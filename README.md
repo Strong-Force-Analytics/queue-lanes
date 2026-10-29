@@ -61,7 +61,7 @@ Needs `git` and the GitHub CLI (`gh`), signed in.
 
 ## Credits
 
-The method and the commands are by Brett Ragozzine. Packaged as a plugin by
+The method and the commands are by [Brett Ragozzine](https://github.com/brag42). Packaged as a plugin by
 [Strong Force Analytics](https://github.com/Strong-Force-Analytics).
 
 ## License
