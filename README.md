@@ -9,15 +9,9 @@ and opens a pull request with the work.
 
 ## How it works
 
-```mermaid
-flowchart LR
-    A["Ideas and tasks"] -->|added to| Q[("QUEUE.md")]
-    Q --> S["/queue:spec<br/>plan the work"]
-    S --> B["/queue:build<br/>do the work"]
-    B --> E["/queue:end<br/>save a note,<br/>open a pull request"]
-    E --> R["You review<br/>and merge"]
-    R -->|next session starts here| Q
-```
+<p align="center">
+  <img src="docs/img/how-it-works.png" alt="How a session works: add ideas, /queue:spec, /queue:build, /queue:end, you review and merge, all around one QUEUE.md file" width="720">
+</p>
 
 1. Add ideas and tasks to `QUEUE.md`, by hand or by asking Claude.
 2. Run `/queue:spec` to turn them into small, clear tasks.
