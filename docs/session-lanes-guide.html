@@ -210,7 +210,7 @@ th { font-size: 14px; letter-spacing: .06em; text-transform: uppercase; color: v
 
 <section id="queue">
 <h2>QUEUE.md</h2>
-<p>One file, fixed location: <code>Documentation/planning/QUEUE.md</code>, or <code>QUEUE.md</code> at the repo root. Every command looks in those two places, in that order.</p>
+<p>One file, fixed location: <code>Documentation/planning/QUEUE.md</code>, or <code>QUEUE.md</code> at the repo root. In a monorepo, a project folder can keep its own <code>QUEUE.md</code>, which comes first. Every command looks in that order.</p>
 <pre><code>## ▶ NEXT SESSION — START HERE    ← handoff note, rewritten by /queue:end
 ## Settled                        ← dated decisions, append-only
 ## Inbox                          ← raw ideas; anyone adds, /queue:spec sorts them into rows
@@ -278,7 +278,7 @@ th { font-size: 14px; letter-spacing: .06em; text-transform: uppercase; color: v
 
 <section id="parallel">
 <h2>Parallel sessions</h2>
-<p>Each opener starts by creating its own <strong>git worktree</strong>: a second checkout of the same repo on its own branch, in a folder under <code>.claude/worktrees/</code>. The worktree name is the claim (<code>build-s3-20261020</code>). Two worktrees cannot share a name, so two terminals never take the same work. At <code>/queue:end</code> the session rebases its branch and fast-forwards it into the main branch.</p>
+<p>Each opener starts by creating its own <strong>git worktree</strong>: a second checkout of the same repo on its own branch, in a folder under <code>.claude/worktrees/</code>. The worktree name is the claim (<code>build-s3-20261020</code>). Two worktrees cannot share a name, so two terminals never take the same work. At <code>/queue:end</code> the session rebases its branch onto the default branch, pushes it and opens a pull request; a person merges it.</p>
 <p>Below: four terminals on one repo in one afternoon. Two build different Session groups, one audits, one specs, and one build session fans a parallel wave out to three subagents.</p>
 <div class="diagram">
 <svg viewBox="0 0 1100 640" role="img" aria-label="Timeline of four parallel sessions on one repo, each in its own worktree, all reading and writing one QUEUE.md and merging into one branch">
@@ -347,8 +347,8 @@ th { font-size: 14px; letter-spacing: .06em; text-transform: uppercase; color: v
     <text x="730" y="387" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="15">/end</text>
 
     <!-- main branch -->
-    <text x="20" y="465" font-weight="600" fill="var(--git)">main branch</text>
-    <text x="20" y="488" font-size="15" fill="var(--muted)">fast-forward at /queue:end</text>
+    <text x="20" y="465" font-weight="600" fill="var(--git)">default branch</text>
+    <text x="20" y="488" font-size="15" fill="var(--muted)">merged pull requests</text>
     <line x1="230" y1="460" x2="1080" y2="460" stroke="var(--git)" stroke-width="3"/>
     <path d="M730,398 V450" stroke="var(--spec)" stroke-width="1.2" stroke-dasharray="4 4"/>
     <path d="M815,318 V450" stroke="var(--audit)" stroke-width="1.2" stroke-dasharray="4 4"/>
@@ -405,12 +405,8 @@ th { font-size: 14px; letter-spacing: .06em; text-transform: uppercase; color: v
 /plugin install queue@sfa-plugins
 /plugin install architect-crew@sfa-plugins
 
-# 2. seed a repo
-mkdir -p Documentation/planning
-cp templates/QUEUE.md Documentation/planning/QUEUE.md
-echo ".claude/worktrees/" >> .gitignore   # session worktrees live here
-
-# 3. in Claude Code, inside that repo
+# 2. in Claude Code, inside your repo
+/queue:init     # add QUEUE.md and the CLAUDE.md section, open a pull request; merge it
 /queue:spec     # turn your first idea into Build rows
 /queue:build    # build the [HEAD] row
 /queue:end      # wrap: update the queue, commit, open the pull request</code></pre>
