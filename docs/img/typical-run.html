@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>A typical run</title>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --paper: #f5f5f5; --ink: #2d3142; --muted: #4f5d75; --soft: #7a8399;
+      --accent: #eb6c36; --accent-tint: rgba(235,108,54,0.08);
+      --sans: 'Geist', system-ui, sans-serif; --mono: 'Geist Mono', ui-monospace, monospace;
+    }
+    body { background: var(--paper); }
+    svg { display: block; width: 1088px; }
+    .wire { fill: none; stroke: var(--muted); stroke-width: 1.2; }
+    .station { fill: var(--paper); stroke: var(--ink); stroke-width: 1; }
+    .station.focal { fill: var(--accent-tint); stroke: var(--accent); stroke-width: 1.2; }
+    .band { fill: #ffffff; stroke: rgba(45,49,66,0.18); stroke-width: 1; }
+    .node-name { fill: var(--ink); font: 600 14px var(--sans); text-anchor: middle; }
+    .focal-name { fill: var(--accent); }
+    .sublabel { fill: var(--soft); font: 400 10px var(--mono); text-anchor: middle; }
+    .eyebrow { fill: var(--muted); font: 500 10px var(--mono); letter-spacing: 0.14em; text-anchor: middle; }
+    .note { fill: var(--soft); font: 400 9px var(--mono); letter-spacing: 0.06em; text-anchor: middle; }
+    .band-text { fill: var(--ink); font: 400 13px var(--sans); text-anchor: middle; }
+    .band-code { font: 600 12px var(--mono); }
+  </style>
+</head>
+<body>
+  <svg viewBox="0 0 1088 328" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="run-title run-desc">
+    <title id="run-title">A typical run of queue-lanes sessions</title>
+    <desc id="run-desc">Six sessions in a row: /queue:spec, /queue:build, two /queue:build sessions at the same time in two terminals, /queue:spec, /queue:build, and /queue:audit. Every step ends with /queue:end and a fresh context.</desc>
+    <defs>
+      <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="0.9" fill="rgba(45,49,66,0.10)"/></pattern>
+      <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+    </defs>
+    <rect width="1088" height="328" fill="#f5f5f5"/>
+    <rect width="1088" height="328" fill="url(#dots)" opacity="0.55"/>
+
+    <text x="94" y="40" class="eyebrow">STEP 1</text>
+    <text x="274" y="40" class="eyebrow">STEP 2</text>
+    <text x="454" y="40" class="eyebrow">STEP 3 · TWO TERMINALS</text>
+    <text x="634" y="40" class="eyebrow">STEP 4</text>
+    <text x="814" y="40" class="eyebrow">STEP 5</text>
+    <text x="994" y="40" class="eyebrow">STEP 6</text>
+
+    <!-- Connectors first, so they sit behind the boxes. -->
+    <path class="wire" d="M164 148 H198" marker-end="url(#arrow)"/>
+    <path class="wire" d="M344 136 H352 Q360 136 360 128 V104 Q360 96 368 96 H378" marker-end="url(#arrow)"/>
+    <path class="wire" d="M344 160 H352 Q360 160 360 168 V192 Q360 200 368 200 H378" marker-end="url(#arrow)"/>
+    <path class="wire" d="M524 96 H532 Q540 96 540 104 V128 Q540 136 548 136 H558" marker-end="url(#arrow)"/>
+    <path class="wire" d="M524 200 H532 Q540 200 540 192 V168 Q540 160 548 160 H558" marker-end="url(#arrow)"/>
+    <path class="wire" d="M704 148 H738" marker-end="url(#arrow)"/>
+    <path class="wire" d="M884 148 H918" marker-end="url(#arrow)"/>
+
+    <rect class="station" x="24" y="112" width="140" height="72" rx="6"/>
+    <text x="94" y="142" class="node-name">/queue:spec</text><text x="94" y="162" class="sublabel">decide, write tasks</text>
+
+    <rect class="station" x="204" y="112" width="140" height="72" rx="6"/>
+    <text x="274" y="142" class="node-name">/queue:build</text><text x="274" y="162" class="sublabel">Session 1</text>
+
+    <rect class="station focal" x="384" y="64" width="140" height="64" rx="6"/>
+    <text x="454" y="92" class="node-name focal-name">/queue:build</text><text x="454" y="110" class="sublabel">terminal A · Session 2</text>
+    <rect class="station focal" x="384" y="168" width="140" height="64" rx="6"/>
+    <text x="454" y="196" class="node-name focal-name">/queue:build</text><text x="454" y="214" class="sublabel">terminal B · Session 3</text>
+    <text x="454" y="252" class="note">SAME TIME, DIFFERENT FILES</text>
+
+    <rect class="station" x="564" y="112" width="140" height="72" rx="6"/>
+    <text x="634" y="142" class="node-name">/queue:spec</text><text x="634" y="162" class="sublabel">next decisions</text>
+
+    <rect class="station" x="744" y="112" width="140" height="72" rx="6"/>
+    <text x="814" y="142" class="node-name">/queue:build</text><text x="814" y="162" class="sublabel">Session 4</text>
+
+    <rect class="station" x="924" y="112" width="140" height="72" rx="6"/>
+    <text x="994" y="142" class="node-name">/queue:audit</text><text x="994" y="162" class="sublabel">docs vs code</text>
+
+    <rect class="band" x="24" y="276" width="1040" height="36" rx="6"/>
+    <text x="544" y="299" class="band-text">Every arrow is <tspan class="band-code">/queue:end</tspan> (note for the next session, pull request), then <tspan class="band-code">/clear</tspan>, then the next command</text>
+  </svg>
+</body>
+</html>

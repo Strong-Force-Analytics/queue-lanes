@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Parallel sessions</title>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --paper: #f5f5f5; --ink: #2d3142; --muted: #4f5d75; --soft: #7a8399;
+      --accent: #eb6c36; --accent-tint: rgba(235,108,54,0.08);
+      --sans: 'Geist', system-ui, sans-serif; --mono: 'Geist Mono', ui-monospace, monospace;
+    }
+    body { background: var(--paper); }
+    svg { display: block; width: 1088px; }
+    .wire { fill: none; stroke: var(--muted); stroke-width: 1.2; }
+    .land { fill: none; stroke: var(--accent); stroke-width: 1.2; stroke-dasharray: 4 3; }
+    .claim { fill: var(--paper); stroke: var(--soft); stroke-width: 1; stroke-dasharray: 3 2; }
+    .work { fill: var(--ink); }
+    .helper { fill: var(--paper); stroke: var(--ink); stroke-width: 1; }
+    .end { fill: var(--paper); stroke: var(--ink); stroke-width: 1.2; }
+    .hub { fill: var(--ink); }
+    .branch { stroke: var(--ink); stroke-width: 2.5; }
+    .axis { stroke: rgba(45,49,66,0.18); stroke-width: 1; }
+    .row-name { fill: var(--ink); font: 600 14px var(--mono); }
+    .row-sub { fill: var(--soft); font: 400 10px var(--mono); }
+    .claim-text { fill: var(--muted); font: 400 10px var(--mono); text-anchor: middle; }
+    .work-text { fill: var(--paper); font: 600 12px var(--sans); text-anchor: middle; }
+    .helper-text { fill: var(--ink); font: 400 10px var(--mono); text-anchor: middle; }
+    .end-text { fill: var(--ink); font: 500 10px var(--mono); text-anchor: middle; }
+    .note { fill: var(--soft); font: 400 9px var(--mono); letter-spacing: 0.06em; text-anchor: middle; }
+    .eyebrow { fill: var(--muted); font: 500 10px var(--mono); letter-spacing: 0.14em; }
+    .hub-name { fill: var(--paper); font: 600 17px var(--mono); }
+    .hub-sub { fill: var(--paper); opacity: 0.72; font: 400 10px var(--mono); }
+    .hub-note { fill: var(--paper); font: 400 11px var(--sans); }
+    .pr { fill: var(--accent); }
+    .pr-label { fill: var(--accent); font: 500 10px var(--mono); }
+  </style>
+</head>
+<body>
+  <svg viewBox="0 0 1088 564" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="par-title par-desc">
+    <title id="par-title">Four queue-lanes sessions on one repo at the same time</title>
+    <desc id="par-desc">Four terminals each claim their own worktree: two build different session groups, one audits, one specs, and one build hands three tasks to helpers at once. Each reads QUEUE.md at the start and, at /queue:end, writes it back and opens a pull request that you merge into the default branch.</desc>
+    <defs>
+      <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="0.9" fill="rgba(45,49,66,0.10)"/></pattern>
+      <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+      <marker id="arrow-soft" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#7a8399"/></marker>
+    </defs>
+    <rect width="1088" height="564" fill="#f5f5f5"/>
+    <rect width="1088" height="564" fill="url(#dots)" opacity="0.55"/>
+
+    <text x="24" y="40" class="eyebrow">ONE REPO, FOUR TERMINALS</text>
+    <line x1="220" y1="44" x2="1064" y2="44" class="axis"/>
+    <text x="1064" y="36" class="eyebrow" text-anchor="end">TIME →</text>
+
+    <!-- Landing: each /queue:end opens a pull request, merged into the default branch. -->
+    <path class="land" d="M924 138 V428"/>
+    <path class="land" d="M852 248 V428"/>
+    <path class="land" d="M764 316 V428"/>
+    <path class="land" d="M720 384 V428"/>
+
+    <!-- A: build with a parallel wave of helpers. -->
+    <text x="24" y="118" class="row-name">A  /queue:build</text>
+    <text x="24" y="136" class="row-sub">worktree build-s3</text>
+    <rect class="claim" x="220" y="106" width="72" height="32" rx="4"/><text x="256" y="126" class="claim-text">claim</text>
+    <rect class="work" x="300" y="106" width="148" height="32" rx="4"/><text x="374" y="126" class="work-text">Build 7</text>
+    <path class="wire" d="M448 114 H456 Q464 114 464 106 V94 Q464 86 472 86 H478" marker-end="url(#arrow)"/>
+    <path class="wire" d="M448 122 H478" marker-end="url(#arrow)"/>
+    <path class="wire" d="M448 130 H456 Q464 130 464 138 V150 Q464 158 472 158 H478" marker-end="url(#arrow)"/>
+    <rect class="helper" x="480" y="72" width="232" height="28" rx="4"/><text x="596" y="90" class="helper-text">helper · Build 8 · export.py</text>
+    <rect class="helper" x="480" y="108" width="232" height="28" rx="4"/><text x="596" y="126" class="helper-text">helper · Build 9 · cli.py</text>
+    <rect class="helper" x="480" y="144" width="232" height="28" rx="4"/><text x="596" y="162" class="helper-text">helper · Build 10 · report.py</text>
+    <path class="wire" d="M712 86 H720 Q728 86 728 94 V106 Q728 114 736 114 H742" marker-end="url(#arrow)"/>
+    <path class="wire" d="M712 122 H742" marker-end="url(#arrow)"/>
+    <path class="wire" d="M712 158 H720 Q728 158 728 150 V138 Q728 130 736 130 H742" marker-end="url(#arrow)"/>
+    <rect class="work" x="744" y="106" width="136" height="32" rx="4"/><text x="812" y="126" class="work-text">review + tests</text>
+    <rect class="end" x="888" y="106" width="72" height="32" rx="4"/><text x="924" y="126" class="end-text">/queue:end</text>
+    <text x="600" y="192" class="note">THREE HELPERS AT ONCE, FILES THAT NEVER OVERLAP</text>
+
+    <!-- B: build a different session group. -->
+    <text x="24" y="228" class="row-name">B  /queue:build</text>
+    <text x="24" y="246" class="row-sub">worktree build-s4</text>
+    <rect class="claim" x="300" y="216" width="72" height="32" rx="4"/><text x="336" y="236" class="claim-text">claim</text>
+    <rect class="work" x="380" y="216" width="200" height="32" rx="4"/><text x="480" y="236" class="work-text">Build 12 · parser.py</text>
+    <rect class="work" x="588" y="216" width="220" height="32" rx="4"/><text x="698" y="236" class="work-text">Build 13 · parser tests</text>
+    <rect class="end" x="816" y="216" width="72" height="32" rx="4"/><text x="852" y="236" class="end-text">/queue:end</text>
+
+    <!-- C: audit. -->
+    <text x="24" y="296" class="row-name">C  /queue:audit</text>
+    <text x="24" y="314" class="row-sub">worktree audit-1</text>
+    <rect class="claim" x="360" y="284" width="72" height="32" rx="4"/><text x="396" y="304" class="claim-text">claim</text>
+    <rect class="work" x="440" y="284" width="280" height="32" rx="4"/><text x="580" y="304" class="work-text">Audit 2 · README vs real CLI flags</text>
+    <rect class="end" x="728" y="284" width="72" height="32" rx="4"/><text x="764" y="304" class="end-text">/queue:end</text>
+
+    <!-- D: spec. -->
+    <text x="24" y="364" class="row-name">D  /queue:spec</text>
+    <text x="24" y="382" class="row-sub">worktree spec-1</text>
+    <rect class="claim" x="420" y="352" width="72" height="32" rx="4"/><text x="456" y="372" class="claim-text">claim</text>
+    <rect class="work" x="500" y="352" width="176" height="32" rx="4"/><text x="588" y="372" class="work-text">Spec 3 · export format</text>
+    <rect class="end" x="684" y="352" width="72" height="32" rx="4"/><text x="720" y="372" class="end-text">/queue:end</text>
+
+    <!-- Default branch: pull requests you merge. -->
+    <text x="24" y="432" class="row-name">default branch</text>
+    <text x="24" y="450" class="row-sub">you merge each pull request</text>
+    <line x1="220" y1="436" x2="1064" y2="436" class="branch"/>
+    <circle cx="720" cy="436" r="6" class="pr"/>
+    <circle cx="764" cy="436" r="6" class="pr"/>
+    <circle cx="852" cy="436" r="6" class="pr"/>
+    <circle cx="924" cy="436" r="6" class="pr"/>
+    <text x="940" y="456" class="pr-label">PULL REQUESTS</text>
+
+    <!-- The one file every session shares. -->
+    <text x="24" y="504" class="row-name">shared queue</text>
+    <text x="24" y="522" class="row-sub">read at the start,</text>
+    <text x="24" y="536" class="row-sub">written at /queue:end</text>
+    <rect class="hub" x="220" y="476" width="844" height="72" rx="8"/>
+    <text x="244" y="508" class="hub-name">QUEUE.md</text>
+    <text x="244" y="530" class="hub-sub">one file, shared by every session</text>
+    <text x="620" y="500" class="hub-note">D adds tasks as a new Session 5</text>
+    <text x="620" y="518" class="hub-note">C queues a fix for a wrong flag</text>
+    <text x="620" y="536" class="hub-note">A and B delete their finished tasks</text>
+  </svg>
+</body>
+</html>
