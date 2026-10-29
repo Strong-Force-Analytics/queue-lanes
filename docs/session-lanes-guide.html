@@ -265,7 +265,7 @@ th { font-size: 14px; letter-spacing: .06em; text-transform: uppercase; color: v
     <text x="610" y="116" text-anchor="middle" font-size="15" fill="var(--muted)">build / decide / fix / verify</text>
     <rect x="770" y="60" width="200" height="70" rx="8" fill="var(--audit-bg)" stroke="var(--audit)" stroke-width="1.5"/>
     <text x="870" y="92" text-anchor="middle" font-weight="600" font-family="IBM Plex Mono, monospace">/queue:end</text>
-    <text x="870" y="116" text-anchor="middle" font-size="15" fill="var(--muted)">update queue, merge, push</text>
+    <text x="870" y="116" text-anchor="middle" font-size="15" fill="var(--muted)">update queue, open PR</text>
     <path d="M190,95 H244" stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#ar)"/>
     <path d="M450,95 H504" stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#ar)"/>
     <path d="M710,95 H764" stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#ar)"/>
@@ -394,7 +394,7 @@ th { font-size: 14px; letter-spacing: .06em; text-transform: uppercase; color: v
   <li><strong>Session groups are the file split.</strong> <code>/queue:spec</code> packs rows so each group owns its files. A group whose files overlap a held group counts as held.</li>
   <li><strong><code>QUEUE.md</code> is the one shared file.</strong> On a rebase conflict, keep both sessions' rows and both handoff blocks (newest first); the next <code>/queue:end</code> folds them together. <code>## Settled</code> is append-only, so keep both lines.</li>
   <li><strong>Stage and commit explicit paths.</strong> <code>git commit -m "..." -- src/parser.py</code>. Avoid <code>git add .</code>, <code>git commit -a</code>, and a bare <code>git commit</code>, which takes whatever is already staged.</li>
-  <li><strong>Commit small, merge at <code>/queue:end</code>.</strong> Rebase onto the main branch, fast-forward merge, push, remove the worktree. If the fast-forward refuses because another session merged first, rebase again.</li>
+  <li><strong>Commit small, land at <code>/queue:end</code>.</strong> Rebase onto the default branch, push the session branch, open a pull request, remove the worktree; a person merges it. A repo with <code>Land: push</code> in its <code>/end in this repo</code> section fast-forward merges and pushes instead; if the fast-forward refuses because another session merged first, rebase again.</li>
 </ul>
 </section>
 
@@ -413,7 +413,7 @@ echo ".claude/worktrees/" >> .gitignore   # session worktrees live here
 # 3. in Claude Code, inside that repo
 /queue:spec     # turn your first idea into Build rows
 /queue:build    # build the [HEAD] row
-/queue:end      # wrap: update the queue, commit, push</code></pre>
+/queue:end      # wrap: update the queue, commit, open the pull request</code></pre>
 <p class="small">Day to day: drop ideas into <code>## Inbox</code> whenever they occur to you; the next <code>/queue:spec</code> sorts them into rows. Open whichever lane fits the time you have.</p>
 </section>
 </main>

@@ -40,6 +40,6 @@ If `$ARGUMENTS` is given, it is where the backlog lives (a file such as `TODO.md
 
    `Land: push` instead tells `/queue:end` to merge into the launch branch and push directly, for a repo where one person works alone on `main`.
 
-6. **Land the setup.** Stage explicit paths only (the queue, `.gitignore`, `CLAUDE.md`, and a removed or edited `TODO.md`). On the default branch, create a branch `queue-init-<YYYYMMDD>` first. Commit `[Docs]: add queue lanes (QUEUE.md, CLAUDE.md work-queue section)` with explicit paths, push, and open a pull request against the default branch with `gh pr create`. If `gh` is missing, print the compare link instead.
+6. **Land the setup.** Stage explicit paths only (the queue, `.gitignore`, `CLAUDE.md`, and a removed or edited `TODO.md`). If you are on the default branch, run `git switch -c queue-init-<YYYYMMDD>` first. Commit `[Docs]: add queue lanes (QUEUE.md, CLAUDE.md work-queue section)` with explicit paths, push, and open a pull request against the default branch with `gh pr create`. If `gh` is missing, print the compare link instead.
 
 7. **Recap.** The queue path, how many Inbox items came in, the pull request link, and the next step: once the pull request is merged, run `/queue:spec` to turn the Inbox into Build rows.
