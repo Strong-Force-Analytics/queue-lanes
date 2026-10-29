@@ -1,0 +1,10 @@
+{
+  "name": "queue",
+  "description": "Session lanes for Claude Code: one QUEUE.md per repo, /queue:build, /queue:spec, /queue:audit and /queue:meta to open a session, /queue:end to close it with a handoff, and /queue:init to set a repo up.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Strong Force Analytics"
+  },
+  "repository": "https://github.com/Strong-Force-Analytics/queue-lanes",
+  "license": "MIT"
+}

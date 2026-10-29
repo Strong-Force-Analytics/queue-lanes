@@ -1,0 +1,420 @@
+<title>session-lanes-guide</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sticky left contents rail + one reading column; diagrams scroll inside their own box */
+:root {
+  --bg: #f6f7f9; --surface: #ffffff; --fg: #1b2230; --muted: #566074; --line: #d5dae3;
+  --build: #2f6fdb; --spec: #c27a12; --meta: #7a4fc9; --audit: #138a7e; --git: #3c4657;
+  --build-bg: #e3ecfb; --spec-bg: #f8ecd9; --meta-bg: #eee6fa; --audit-bg: #dcf1ee;
+  --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #12161d; --surface: #1a2029; --fg: #e5e9f0; --muted: #9aa5b8; --line: #2e3744;
+  --build: #6f9ff0; --spec: #e3a54a; --meta: #a98ae6; --audit: #4cc2b5; --git: #b6c0cf;
+  --build-bg: #1d2b44; --spec-bg: #3a2c16; --meta-bg: #2c2340; --audit-bg: #163631; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #12161d; --surface: #1a2029; --fg: #e5e9f0; --muted: #9aa5b8; --line: #2e3744;
+  --build: #6f9ff0; --spec: #e3a54a; --meta: #a98ae6; --audit: #4cc2b5; --git: #b6c0cf;
+  --build-bg: #1d2b44; --spec-bg: #3a2c16; --meta-bg: #2c2340; --audit-bg: #163631; color-scheme: dark }
+
+body { background: var(--bg); color: var(--fg); font: 19px/1.6 var(--sans); }
+.wrap { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 32px; max-width: 1440px; margin: 0 auto;
+  padding-block: 40px 80px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+nav { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); align-self: start; max-height: calc(100vh - 48px); overflow-y: auto; }
+nav p { font-size: 14px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+nav a { display: block; font-size: 17px; color: var(--fg); text-decoration: none; padding: 6px 0 6px 12px; border-left: 2px solid var(--line); }
+nav a:hover, nav a:focus-visible { border-left-color: var(--build); outline: none; }
+main { min-width: 0; }
+h1 { font-size: 44px; line-height: 1.15; margin: 0 0 12px; text-wrap: balance; }
+.lede { font-size: 21px; color: var(--muted); margin: 0 0 36px; max-width: 62ch; }
+section { padding-top: 28px; margin-bottom: 28px; border-top: 1px solid var(--line); }
+h2 { font-size: 30px; margin: 0 0 14px; text-wrap: balance; }
+h3 { font-size: 22px; margin: 26px 0 8px; }
+p, li { max-width: 68ch; }
+code { font: 16px var(--mono); background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; }
+pre { font: 16px/1.5 var(--mono); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px 18px; overflow-x: auto; }
+pre code { border: 0; padding: 0; background: none; }
+.small { font-size: 17px; color: var(--muted); }
+.lanes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 18px 0; }
+.lane { background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--c); border-radius: 6px; padding: 16px 18px; min-width: 0; }
+.lane h3 { margin: 0 0 4px; font: 600 22px var(--mono); color: var(--c); }
+.lane .q { font-size: 17px; color: var(--muted); margin: 0 0 8px; }
+.lane ul { margin: 0; padding-left: 20px; font-size: 17px; }
+.diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; overflow-x: auto; padding: 12px; margin: 18px 0; }
+.diagram svg { display: block; min-width: 1100px; width: 100%; height: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 17px; }
+.tbl { overflow-x: auto; margin: 16px 0; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 14px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.ok { color: var(--audit); font-weight: 600; } .care { color: var(--spec); font-weight: 600; }
+@media (max-width: 900px) { .wrap { grid-template-columns: minmax(0, 1fr); gap: 24px; } nav { position: static; max-height: none; } h1 { font-size: 34px; } }
+</style>
+
+<div class="wrap">
+<nav aria-label="Contents">
+  <p>Contents</p>
+  <a href="#idea">The idea</a>
+  <a href="#typical">A typical run</a>
+  <a href="#queue">QUEUE.md</a>
+  <a href="#lanes">The four openers</a>
+  <a href="#loop">One session, start to end</a>
+  <a href="#parallel">Parallel sessions</a>
+  <a href="#rules">Rules that keep parallel safe</a>
+  <a href="#start">Get started</a>
+</nav>
+
+<main>
+<h1>Session lanes for Claude Code</h1>
+<p class="lede">One queue file per repo, four commands that each open a different kind of session, and one command that closes it. Every session starts knowing what to do, and several can run at once.</p>
+
+<section id="idea">
+<h2>The idea</h2>
+<p>Most AI coding sessions start from a blank prompt and end with the context lost in chat history. This kit replaces both ends with files in the repo:</p>
+<ul>
+  <li><strong><code>QUEUE.md</code></strong> holds every piece of pending work, sorted into lanes by <em>kind</em> of work.</li>
+  <li><strong>An opener command</strong> (<code>/queue:build</code>, <code>/queue:spec</code>, <code>/queue:meta</code>, <code>/queue:audit</code>) starts a session by reading one lane.</li>
+  <li><strong><code>/queue:end</code></strong> closes the session: it updates the queue, writes a handoff note for the next session, and commits.</li>
+</ul>
+<p>The lanes exist because the four kinds of work need different behaviour. A build session should build and never stop to redesign. A spec session should make decisions and write them down. Mixing them is how a session spends an hour planning when it was opened to ship.</p>
+</section>
+
+<section id="typical">
+<h2>A typical run</h2>
+<p>Here is how a normal stretch of work looks: six sessions in a row, one of them split across two terminals. Each box is one session. Every session opens with one command and closes with <code>/queue:end</code>; then <code>/clear</code> (or a fresh terminal) starts the next one with an empty context. The queue file carries everything forward, so nothing has to be re-explained.</p>
+<div class="diagram">
+<svg viewBox="0 0 1100 350" style="min-width:1100px;max-width:1100px" role="img" aria-label="Six sessions in a row: spec, build, two builds in parallel, spec, build, audit">
+  <defs><marker id="ar0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker></defs>
+  <g font-family="IBM Plex Sans, system-ui, sans-serif" font-size="16" fill="var(--fg)">
+    <text x="100" y="38" text-anchor="middle" fill="var(--muted)">Step 1</text>
+    <text x="280" y="38" text-anchor="middle" fill="var(--muted)">Step 2</text>
+    <text x="460" y="38" text-anchor="middle" fill="var(--muted)">Step 3 · two terminals</text>
+    <text x="640" y="38" text-anchor="middle" fill="var(--muted)">Step 4</text>
+    <text x="820" y="38" text-anchor="middle" fill="var(--muted)">Step 5</text>
+    <text x="1000" y="38" text-anchor="middle" fill="var(--muted)">Step 6</text>
+
+    <rect x="25" y="100" width="150" height="90" rx="8" fill="var(--spec-bg)" stroke="var(--spec)" stroke-width="2"/>
+    <text x="100" y="132" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="21" font-weight="600" fill="var(--spec)">/queue:spec</text>
+    <text x="100" y="160" text-anchor="middle">decide, write</text>
+    <text x="100" y="180" text-anchor="middle">Build rows</text>
+
+    <rect x="205" y="100" width="150" height="90" rx="8" fill="var(--build-bg)" stroke="var(--build)" stroke-width="2"/>
+    <text x="280" y="132" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="21" font-weight="600" fill="var(--build)">/build</text>
+    <text x="280" y="160" text-anchor="middle">build</text>
+    <text x="280" y="180" text-anchor="middle">Session 1</text>
+
+    <rect x="385" y="52" width="150" height="76" rx="8" fill="var(--build-bg)" stroke="var(--build)" stroke-width="2"/>
+    <text x="460" y="84" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="21" font-weight="600" fill="var(--build)">/build</text>
+    <text x="460" y="112" text-anchor="middle">Terminal A · S2</text>
+    <rect x="385" y="160" width="150" height="76" rx="8" fill="var(--build-bg)" stroke="var(--build)" stroke-width="2"/>
+    <text x="460" y="192" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="21" font-weight="600" fill="var(--build)">/build</text>
+    <text x="460" y="220" text-anchor="middle">Terminal B · S3</text>
+
+    <rect x="565" y="100" width="150" height="90" rx="8" fill="var(--spec-bg)" stroke="var(--spec)" stroke-width="2"/>
+    <text x="640" y="132" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="21" font-weight="600" fill="var(--spec)">/queue:spec</text>
+    <text x="640" y="160" text-anchor="middle">next decisions,</text>
+    <text x="640" y="180" text-anchor="middle">new rows</text>
+
+    <rect x="745" y="100" width="150" height="90" rx="8" fill="var(--build-bg)" stroke="var(--build)" stroke-width="2"/>
+    <text x="820" y="132" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="21" font-weight="600" fill="var(--build)">/build</text>
+    <text x="820" y="160" text-anchor="middle">build</text>
+    <text x="820" y="180" text-anchor="middle">Session 4</text>
+
+    <rect x="925" y="100" width="150" height="90" rx="8" fill="var(--audit-bg)" stroke="var(--audit)" stroke-width="2"/>
+    <text x="1000" y="132" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="21" font-weight="600" fill="var(--audit)">/audit</text>
+    <text x="1000" y="160" text-anchor="middle">check docs</text>
+    <text x="1000" y="180" text-anchor="middle">against code</text>
+
+    <path d="M175,145 H199" stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#ar0)"/>
+    <path d="M355,145 C370,145 368,90 380,90" stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#ar0)"/>
+    <path d="M355,145 C370,145 368,198 380,198" stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#ar0)"/>
+    <path d="M535,90 C550,90 548,145 560,145" stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#ar0)"/>
+    <path d="M535,198 C550,198 548,145 560,145" stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#ar0)"/>
+    <path d="M715,145 H739" stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#ar0)"/>
+    <path d="M895,145 H919" stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#ar0)"/>
+
+    <text x="460" y="262" text-anchor="middle" font-size="15" fill="var(--muted)">same time, different files</text>
+
+    <rect x="25" y="286" width="1050" height="48" rx="8" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
+    <text x="550" y="316" text-anchor="middle" font-size="17">Every arrow = <tspan font-family="IBM Plex Mono, monospace" font-weight="600">/queue:end</tspan> (commit, update QUEUE.md, write the handoff note) → <tspan font-family="IBM Plex Mono, monospace" font-weight="600">/clear</tspan> → next opener</text>
+  </g>
+</svg>
+</div>
+<ol>
+  <li><strong><code>/queue:spec</code></strong> turns ideas and open questions into concrete Build rows, packed into Session groups.</li>
+  <li><strong><code>/queue:build</code></strong> builds the first group. Its <code>/queue:end</code> says what comes next.</li>
+  <li><strong>Two builds at once.</strong> When <code>/queue:end</code> prints <code>Next: /queue:build ×2 (files disjoint)</code>, open a second terminal and type <code>/queue:build</code> in both. Each one claims a different group, and the two never touch the same files.</li>
+  <li><strong><code>/queue:spec</code></strong> again once the planned rows run low: it picks up what the builds learned and writes the next rows.</li>
+  <li><strong><code>/queue:build</code></strong> works through those rows.</li>
+  <li><strong><code>/queue:audit</code></strong> closes the stretch: it checks that the README and docs still match what was just built, and queues any gaps.</li>
+</ol>
+
+<h3>How to pick the next session</h3>
+<p>You rarely have to think about it: read the <code>Next:</code> line that <code>/queue:end</code> prints and follow this.</p>
+<div class="diagram">
+<svg viewBox="0 0 1100 300" style="min-width:1100px;max-width:1100px" role="img" aria-label="Decision flow for the next session: spec if decisions are open, two builds if /queue:end says so, audit after a run of builds, otherwise build">
+  <defs><marker id="ar1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker></defs>
+  <g font-family="IBM Plex Sans, system-ui, sans-serif" font-size="16" fill="var(--fg)">
+    <rect x="20" y="40" width="140" height="100" rx="8" fill="var(--surface)" stroke="var(--fg)" stroke-width="1.5"/>
+    <text x="90" y="80" text-anchor="middle" font-weight="600">Session</text>
+    <text x="90" y="100" text-anchor="middle" font-weight="600">ended</text>
+    <text x="90" y="124" text-anchor="middle" font-size="15" fill="var(--muted)">read Next: line</text>
+
+    <rect x="196" y="40" width="226" height="100" rx="8" fill="var(--surface)" stroke="var(--line)" stroke-width="2" stroke-dasharray="6 4"/>
+    <text x="309" y="72" text-anchor="middle">Decisions open, or</text>
+    <text x="309" y="94" text-anchor="middle">ideas in the Inbox,</text>
+    <text x="309" y="116" text-anchor="middle">and no Build rows?</text>
+
+    <rect x="458" y="40" width="226" height="100" rx="8" fill="var(--surface)" stroke="var(--line)" stroke-width="2" stroke-dasharray="6 4"/>
+    <text x="571" y="72" text-anchor="middle">Did /queue:end print</text>
+    <text x="571" y="94" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="15">/queue:build ×2</text>
+    <text x="571" y="116" text-anchor="middle">(files disjoint)?</text>
+
+    <rect x="720" y="40" width="226" height="100" rx="8" fill="var(--surface)" stroke="var(--line)" stroke-width="2" stroke-dasharray="6 4"/>
+    <text x="833" y="82" text-anchor="middle">Just finished a</text>
+    <text x="833" y="104" text-anchor="middle">run of builds?</text>
+
+    <rect x="982" y="55" width="100" height="70" rx="8" fill="var(--build-bg)" stroke="var(--build)" stroke-width="2"/>
+    <text x="1032" y="97" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="19" font-weight="600" fill="var(--build)">/build</text>
+
+    <rect x="214" y="200" width="190" height="76" rx="8" fill="var(--spec-bg)" stroke="var(--spec)" stroke-width="2"/>
+    <text x="309" y="232" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="19" font-weight="600" fill="var(--spec)">/queue:spec</text>
+    <text x="309" y="258" text-anchor="middle" font-size="15">decide, write rows</text>
+    <rect x="476" y="200" width="190" height="76" rx="8" fill="var(--build-bg)" stroke="var(--build)" stroke-width="2"/>
+    <text x="571" y="232" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="19" font-weight="600" fill="var(--build)">/queue:build ×2</text>
+    <text x="571" y="258" text-anchor="middle" font-size="15">two terminals</text>
+    <rect x="738" y="200" width="190" height="76" rx="8" fill="var(--audit-bg)" stroke="var(--audit)" stroke-width="2"/>
+    <text x="833" y="232" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="19" font-weight="600" fill="var(--audit)">/queue:audit</text>
+    <text x="833" y="258" text-anchor="middle" font-size="15">docs vs code</text>
+
+    <path d="M160,90 H190" stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#ar1)"/>
+    <path d="M422,90 H452" stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#ar1)"/>
+    <path d="M684,90 H714" stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#ar1)"/>
+    <path d="M946,90 H976" stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#ar1)"/>
+    <text x="437" y="80" text-anchor="middle" font-size="15" fill="var(--muted)">no</text>
+    <text x="699" y="80" text-anchor="middle" font-size="15" fill="var(--muted)">no</text>
+    <text x="961" y="80" text-anchor="middle" font-size="15" fill="var(--muted)">no</text>
+
+    <path d="M309,140 V194" stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#ar1)"/>
+    <path d="M571,140 V194" stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#ar1)"/>
+    <path d="M833,140 V194" stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#ar1)"/>
+    <text x="322" y="173" font-size="15" fill="var(--muted)">yes</text>
+    <text x="584" y="173" font-size="15" fill="var(--muted)">yes</text>
+    <text x="846" y="173" font-size="15" fill="var(--muted)">yes</text>
+  </g>
+</svg>
+</div>
+<p class="small">The sections below explain each piece: the queue file, what each opener does, and how parallel terminals stay out of each other's way.</p>
+</section>
+
+<section id="queue">
+<h2>QUEUE.md</h2>
+<p>One file, fixed location: <code>Documentation/planning/QUEUE.md</code>, or <code>QUEUE.md</code> at the repo root. Every command looks in those two places, in that order.</p>
+<pre><code>## ▶ NEXT SESSION — START HERE    ← handoff note, rewritten by /queue:end
+## Settled                        ← dated decisions, append-only
+## Inbox                          ← raw ideas; anyone adds, /queue:spec sorts them into rows
+## Build                          ← concrete steps, packed in "Session N" groups → /queue:build
+## Spec                           ← open decisions   → /queue:spec
+## Meta                           ← process friction → /queue:meta
+## Audit                          ← claims to verify → /queue:audit</code></pre>
+<h3>A Build row</h3>
+<pre><code>- [HEAD] Build 7 — Parse the export header into a typed record
+  - Files: src/parser.py, tests/test_parser.py
+  - Guardrails: header order varies by vendor; match on names, never position
+  - Done when: pytest tests/test_parser.py passes on all three sample files</code></pre>
+<ul>
+  <li><code>[HEAD]</code> marks the one row <code>/queue:build</code> takes next. <code>/queue:end</code> moves it down once the gate passes.</li>
+  <li><strong>Guardrails</strong> names the condition to hold so the work lands right: the thing a reader of the one-line summary would miss.</li>
+  <li><strong>Done when</strong> is an observable check, so "finished" is a fact, never a feeling.</li>
+  <li>Finished rows are deleted. The commit message is the record.</li>
+  <li><code>/queue:spec</code> packs rows into <strong>Session groups</strong> (<code>**Session 3 — packed by file:** Files ...</code>). A group is one terminal's work. Groups with no files in common can be built at the same time.</li>
+</ul>
+</section>
+
+<section id="lanes">
+<h2>The four openers</h2>
+<div class="lanes">
+  <div class="lane" style="--c: var(--build)"><h3>/queue:build</h3><p class="q">"Make the next thing."</p>
+    <ul><li>Claims one unheld Session group in its own git worktree</li><li>Builds each row to its Done-when gate, commits, moves on</li><li>Never re-plans; a design gap becomes a Spec row</li><li>Can fan a parallel wave out to subagents</li></ul></div>
+  <div class="lane" style="--c: var(--spec)"><h3>/queue:spec</h3><p class="q">"Decide, then write it down."</p>
+    <ul><li>Sorts <code>## Inbox</code> into rows (the only lane that does)</li><li>Takes an open decision from <code>## Spec</code></li><li>Researches, decides, records it in <code>## Settled</code></li><li>Writes concrete rows into <code>## Build</code></li><li>Groups file-disjoint rows into parallel waves</li></ul></div>
+  <div class="lane" style="--c: var(--meta)"><h3>/queue:meta</h3><p class="q">"Fix how we work."</p>
+    <ul><li>Takes friction from <code>## Meta</code></li><li>Fixes commands, conventions, scripts, hooks</li><li>Fixes a problem at the highest level that governs it</li><li>Hands back to <code>/queue:build</code> quickly</li></ul></div>
+  <div class="lane" style="--c: var(--audit)"><h3>/queue:audit</h3><p class="q">"Is what we wrote true?"</p>
+    <ul><li>Takes a claim from <code>## Audit</code></li><li>Checks the docs against the code and the numbers</li><li>Fixes cheap gaps on the spot</li><li>Queues the rest into the right lane</li></ul></div>
+</div>
+<p><strong>Where to fix a problem:</strong> <code>CLAUDE.md</code> &gt; <code>QUEUE.md</code> &gt; <code>/queue:meta</code> &gt; <code>/queue:audit</code> &gt; <code>/queue:spec</code> &gt; <code>/queue:build</code>. A wrong rule high up silently corrupts everything below it, so fix it where it lives. Then come straight back down: <code>/queue:build</code> is the point of the other five.</p>
+<p class="small">The lane is named Spec rather than Plan because <code>/plan</code> is already a built-in Claude Code command.</p>
+</section>
+
+<section id="loop">
+<h2>One session, start to end</h2>
+<div class="diagram">
+<svg viewBox="0 0 1000 190" style="min-width:1000px;max-width:1000px" role="img" aria-label="Session loop: QUEUE.md feeds an opener, the session works, /queue:end writes back to QUEUE.md and commits">
+  <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker></defs>
+  <g font-family="IBM Plex Sans, system-ui, sans-serif" font-size="18" fill="var(--fg)">
+    <rect x="20" y="60" width="170" height="70" rx="8" fill="var(--surface)" stroke="var(--fg)" stroke-width="1.5"/>
+    <text x="105" y="92" text-anchor="middle" font-weight="600" font-family="IBM Plex Mono, monospace">QUEUE.md</text>
+    <text x="105" y="116" text-anchor="middle" font-size="15" fill="var(--muted)">handoff + lanes</text>
+    <rect x="250" y="60" width="200" height="70" rx="8" fill="var(--build-bg)" stroke="var(--build)" stroke-width="1.5"/>
+    <text x="350" y="92" text-anchor="middle" font-weight="600">Opener</text>
+    <text x="350" y="116" text-anchor="middle" font-size="15" fill="var(--muted)">own worktree, claim item</text>
+    <rect x="510" y="60" width="200" height="70" rx="8" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
+    <text x="610" y="92" text-anchor="middle" font-weight="600">Work</text>
+    <text x="610" y="116" text-anchor="middle" font-size="15" fill="var(--muted)">build / decide / fix / verify</text>
+    <rect x="770" y="60" width="200" height="70" rx="8" fill="var(--audit-bg)" stroke="var(--audit)" stroke-width="1.5"/>
+    <text x="870" y="92" text-anchor="middle" font-weight="600" font-family="IBM Plex Mono, monospace">/queue:end</text>
+    <text x="870" y="116" text-anchor="middle" font-size="15" fill="var(--muted)">update queue, merge, push</text>
+    <path d="M190,95 H244" stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+    <path d="M450,95 H504" stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+    <path d="M710,95 H764" stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+    <path d="M870,130 V165 H105 V136" stroke="var(--muted)" stroke-width="2" fill="none" stroke-dasharray="6 5" marker-end="url(#ar)"/>
+    <text x="487" y="158" text-anchor="middle" font-size="16" fill="var(--muted)">new handoff note, advanced [HEAD], ideas added to Inbox</text>
+  </g>
+</svg>
+</div>
+</section>
+
+<section id="parallel">
+<h2>Parallel sessions</h2>
+<p>Each opener starts by creating its own <strong>git worktree</strong>: a second checkout of the same repo on its own branch, in a folder under <code>.claude/worktrees/</code>. The worktree name is the claim (<code>build-s3-20261020</code>). Two worktrees cannot share a name, so two terminals never take the same work. At <code>/queue:end</code> the session rebases its branch and fast-forwards it into the main branch.</p>
+<p>Below: four terminals on one repo in one afternoon. Two build different Session groups, one audits, one specs, and one build session fans a parallel wave out to three subagents.</p>
+<div class="diagram">
+<svg viewBox="0 0 1100 640" role="img" aria-label="Timeline of four parallel sessions on one repo, each in its own worktree, all reading and writing one QUEUE.md and merging into one branch">
+  <defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker></defs>
+  <g font-family="IBM Plex Sans, system-ui, sans-serif" font-size="17" fill="var(--fg)">
+    <line x1="230" y1="28" x2="1080" y2="28" stroke="var(--line)" stroke-width="1.5"/>
+    <text x="230" y="20" font-size="15" fill="var(--muted)">1:00 pm</text>
+    <text x="1080" y="20" font-size="15" fill="var(--muted)" text-anchor="end">5:00 pm</text>
+    <text x="655" y="20" font-size="15" fill="var(--muted)" text-anchor="middle">time →</text>
+
+    <!-- A: /queue:build Session 3 with a wave -->
+    <text x="20" y="98" font-weight="600" fill="var(--build)" font-family="IBM Plex Mono, monospace" font-size="19">A  /queue:build</text>
+    <text x="20" y="122" font-size="15" fill="var(--muted)">worktree build-s3</text>
+    <rect x="230" y="84" width="90" height="34" rx="5" fill="var(--build-bg)" stroke="var(--build)"/>
+    <text x="275" y="107" text-anchor="middle" font-size="15">claim</text>
+    <rect x="325" y="84" width="190" height="34" rx="5" fill="var(--build)"/>
+    <text x="420" y="107" text-anchor="middle" fill="var(--surface)" font-weight="600">Build 7 [HEAD]</text>
+    <path d="M515,101 C530,101 530,62 548,62" stroke="var(--build)" stroke-width="1.5" fill="none"/>
+    <path d="M515,101 H548" stroke="var(--build)" stroke-width="1.5" fill="none"/>
+    <path d="M515,101 C530,101 530,140 548,140" stroke="var(--build)" stroke-width="1.5" fill="none"/>
+    <rect x="548" y="48" width="260" height="28" rx="5" fill="var(--build-bg)" stroke="var(--build)"/>
+    <text x="558" y="68" font-size="15">builder · Build 8 · owns export.py</text>
+    <rect x="548" y="87" width="260" height="28" rx="5" fill="var(--build-bg)" stroke="var(--build)"/>
+    <text x="558" y="107" font-size="15">builder · Build 9 · owns cli.py</text>
+    <rect x="548" y="126" width="260" height="28" rx="5" fill="var(--build-bg)" stroke="var(--build)"/>
+    <text x="558" y="146" font-size="15">builder · Build 10 · owns report.py</text>
+    <path d="M808,62 C826,62 826,101 842,101" stroke="var(--build)" stroke-width="1.5" fill="none"/>
+    <path d="M808,101 H842" stroke="var(--build)" stroke-width="1.5" fill="none"/>
+    <path d="M808,140 C826,140 826,101 842,101" stroke="var(--build)" stroke-width="1.5" fill="none"/>
+    <rect x="842" y="84" width="140" height="34" rx="5" fill="var(--build)"/>
+    <text x="912" y="107" text-anchor="middle" fill="var(--surface)" font-size="15" font-weight="600">review + tests</text>
+    <rect x="986" y="84" width="80" height="34" rx="5" fill="var(--surface)" stroke="var(--build)" stroke-width="2"/>
+    <text x="1026" y="107" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="15">/end</text>
+    <text x="680" y="176" text-anchor="middle" font-size="15" fill="var(--muted)">parallel wave: three subagents, three files that never overlap</text>
+
+    <!-- B: /queue:build Session 4 -->
+    <text x="20" y="218" font-weight="600" fill="var(--build)" font-family="IBM Plex Mono, monospace" font-size="19">B  /queue:build</text>
+    <text x="20" y="242" font-size="15" fill="var(--muted)">worktree build-s4</text>
+    <rect x="300" y="204" width="80" height="34" rx="5" fill="var(--build-bg)" stroke="var(--build)"/>
+    <text x="340" y="227" text-anchor="middle" font-size="15">claim</text>
+    <rect x="385" y="204" width="225" height="34" rx="5" fill="var(--build)"/>
+    <text x="497" y="227" text-anchor="middle" fill="var(--surface)" font-weight="600">Build 12 · parser.py</text>
+    <rect x="615" y="204" width="260" height="34" rx="5" fill="var(--build)"/>
+    <text x="745" y="227" text-anchor="middle" fill="var(--surface)" font-weight="600">Build 13 · parser tests</text>
+    <rect x="880" y="204" width="80" height="34" rx="5" fill="var(--surface)" stroke="var(--build)" stroke-width="2"/>
+    <text x="920" y="227" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="15">/end</text>
+
+    <!-- C: /queue:audit -->
+    <text x="20" y="298" font-weight="600" fill="var(--audit)" font-family="IBM Plex Mono, monospace" font-size="19">C  /queue:audit</text>
+    <text x="20" y="322" font-size="15" fill="var(--muted)">worktree audit-1</text>
+    <rect x="360" y="284" width="80" height="34" rx="5" fill="var(--audit-bg)" stroke="var(--audit)"/>
+    <text x="400" y="307" text-anchor="middle" font-size="15">claim</text>
+    <rect x="445" y="284" width="325" height="34" rx="5" fill="var(--audit)"/>
+    <text x="607" y="307" text-anchor="middle" fill="var(--surface)" font-weight="600">Audit 2: README vs real CLI flags</text>
+    <rect x="775" y="284" width="80" height="34" rx="5" fill="var(--surface)" stroke="var(--audit)" stroke-width="2"/>
+    <text x="815" y="307" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="15">/end</text>
+
+    <!-- D: /queue:spec -->
+    <text x="20" y="378" font-weight="600" fill="var(--spec)" font-family="IBM Plex Mono, monospace" font-size="19">D  /queue:spec</text>
+    <text x="20" y="402" font-size="15" fill="var(--muted)">worktree spec-1</text>
+    <rect x="430" y="364" width="70" height="34" rx="5" fill="var(--spec-bg)" stroke="var(--spec)"/>
+    <text x="465" y="387" text-anchor="middle" font-size="15">claim</text>
+    <rect x="505" y="364" width="185" height="34" rx="5" fill="var(--spec)"/>
+    <text x="597" y="387" text-anchor="middle" fill="var(--surface)" font-weight="600">Spec 3: export format</text>
+    <rect x="695" y="364" width="70" height="34" rx="5" fill="var(--surface)" stroke="var(--spec)" stroke-width="2"/>
+    <text x="730" y="387" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="15">/end</text>
+
+    <!-- main branch -->
+    <text x="20" y="465" font-weight="600" fill="var(--git)">main branch</text>
+    <text x="20" y="488" font-size="15" fill="var(--muted)">fast-forward at /queue:end</text>
+    <line x1="230" y1="460" x2="1080" y2="460" stroke="var(--git)" stroke-width="3"/>
+    <path d="M730,398 V450" stroke="var(--spec)" stroke-width="1.2" stroke-dasharray="4 4"/>
+    <path d="M815,318 V450" stroke="var(--audit)" stroke-width="1.2" stroke-dasharray="4 4"/>
+    <path d="M920,238 V450" stroke="var(--build)" stroke-width="1.2" stroke-dasharray="4 4"/>
+    <path d="M1026,118 V450" stroke="var(--build)" stroke-width="1.2" stroke-dasharray="4 4"/>
+    <circle cx="730" cy="460" r="8" fill="var(--spec)"/>
+    <circle cx="815" cy="460" r="8" fill="var(--audit)"/>
+    <circle cx="920" cy="460" r="8" fill="var(--build)"/>
+    <circle cx="1026" cy="460" r="8" fill="var(--build)"/>
+
+    <!-- QUEUE.md -->
+    <rect x="230" y="520" width="850" height="96" rx="8" fill="var(--surface)" stroke="var(--fg)" stroke-width="1.5"/>
+    <text x="250" y="550" font-weight="600" font-family="IBM Plex Mono, monospace" font-size="19">QUEUE.md</text>
+    <text x="250" y="576" font-size="15" fill="var(--muted)">one file, shared by every session</text>
+    <text x="250" y="598" font-size="15" fill="var(--muted)">on a merge conflict, keep both sides' rows</text>
+    <text x="700" y="550" font-size="15" fill="var(--spec)">D adds Build rows as a new Session 5</text>
+    <text x="700" y="574" font-size="15" fill="var(--audit)">C queues a Build row for a wrong flag</text>
+    <text x="700" y="598" font-size="15" fill="var(--build)">A and B delete finished rows, rewrite handoff</text>
+    <path d="M275,514 V124" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#ar2)"/>
+    <path d="M340,514 V244" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#ar2)"/>
+    <path d="M400,514 V324" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#ar2)"/>
+    <path d="M465,514 V404" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#ar2)"/>
+    <text x="20" y="550" font-size="15" fill="var(--muted)">↑ read at start</text>
+    <text x="20" y="574" font-size="15" fill="var(--muted)">↓ written at /queue:end</text>
+  </g>
+</svg>
+</div>
+<h3>Which sessions run well side by side</h3>
+<div class="tbl"><table>
+  <tr><th>Pair</th><th>Fit</th><th>Why</th></tr>
+  <tr><td><code>/queue:build</code> + <code>/queue:build</code></td><td class="ok">Good</td><td>When their Session groups share no files. <code>/queue:end</code> tells you how many: <code>Next: /queue:build ×2 — Sessions 3 and 4 (files disjoint)</code>. Open that many terminals and type <code>/queue:build</code> in each; each claims the next free group.</td></tr>
+  <tr><td><code>/queue:build</code> + <code>/queue:audit</code></td><td class="ok">Good</td><td>Code versus docs. Audit queues fixes rather than editing code a build holds.</td></tr>
+  <tr><td><code>/queue:build</code> + <code>/queue:spec</code></td><td class="ok">Good</td><td>Spec puts new rows into a new group when an existing one is held, and leaves the held group's text alone.</td></tr>
+  <tr><td><code>/queue:spec</code> + <code>/queue:spec</code></td><td class="care">Plan it</td><td>Both sort the Inbox and repack groups. One spec session at a time is simpler.</td></tr>
+  <tr><td><code>/queue:meta</code> + anything</td><td class="care">Plan it</td><td>Meta edits the commands the other sessions run. A changed command takes effect in the next session, so finish in-flight work before relying on it.</td></tr>
+</table></div>
+</section>
+
+<section id="rules">
+<h2>Rules that keep parallel safe</h2>
+<ul>
+  <li><strong>One worktree per session.</strong> Never open a second session inside an existing worktree folder. The opener creates its own, and backs out if the name was already taken.</li>
+  <li><strong>Session groups are the file split.</strong> <code>/queue:spec</code> packs rows so each group owns its files. A group whose files overlap a held group counts as held.</li>
+  <li><strong><code>QUEUE.md</code> is the one shared file.</strong> On a rebase conflict, keep both sessions' rows and both handoff blocks (newest first); the next <code>/queue:end</code> folds them together. <code>## Settled</code> is append-only, so keep both lines.</li>
+  <li><strong>Stage and commit explicit paths.</strong> <code>git commit -m "..." -- src/parser.py</code>. Avoid <code>git add .</code>, <code>git commit -a</code>, and a bare <code>git commit</code>, which takes whatever is already staged.</li>
+  <li><strong>Commit small, merge at <code>/queue:end</code>.</strong> Rebase onto the main branch, fast-forward merge, push, remove the worktree. If the fast-forward refuses because another session merged first, rebase again.</li>
+</ul>
+</section>
+
+<section id="start">
+<h2>Get started</h2>
+<pre><code># 1. install the plugins (architect-crew is optional)
+/plugin marketplace add Strong-Force-Analytics/claude-plugins
+/plugin install queue@sfa-plugins
+/plugin install architect-crew@sfa-plugins
+
+# 2. seed a repo
+mkdir -p Documentation/planning
+cp templates/QUEUE.md Documentation/planning/QUEUE.md
+echo ".claude/worktrees/" >> .gitignore   # session worktrees live here
+
+# 3. in Claude Code, inside that repo
+/queue:spec     # turn your first idea into Build rows
+/queue:build    # build the [HEAD] row
+/queue:end      # wrap: update the queue, commit, push</code></pre>
+<p class="small">Day to day: drop ideas into <code>## Inbox</code> whenever they occur to you; the next <code>/queue:spec</code> sorts them into rows. Open whichever lane fits the time you have.</p>
+</section>
+</main>
+</div>
