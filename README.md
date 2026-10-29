@@ -19,6 +19,20 @@ and opens a pull request with the work.
 4. Every session ends with `/queue:end`. Review and merge its pull request, then start the next
    session.
 
+## A typical run
+
+<p align="center">
+  <img src="docs/img/typical-run.png" alt="Six sessions in a row: /queue:spec, /queue:build, two /queue:build sessions at once in two terminals, /queue:spec, /queue:build, /queue:audit" width="900">
+</p>
+
+When `/queue:end` says two groups of tasks touch different files, open a second terminal and
+run `/queue:build` in both. Each session works in its own copy of the repo and opens its own
+pull request:
+
+<p align="center">
+  <img src="docs/img/parallel-sessions.png" alt="Four terminals on one repo: two builds, an audit and a spec, each in its own worktree, each reading QUEUE.md at the start and opening a pull request at /queue:end" width="900">
+</p>
+
 ## Install
 
 In Claude Code:
