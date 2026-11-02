@@ -73,7 +73,9 @@ Needs `git` and the GitHub CLI (`gh`), signed in.
 - **Adding ideas by hand.** Sessions work in their own copy of the repo, so they can't see
   uncommitted edits in yours. Commit and push a line you add to `## Inbox` before the next
   session, or tell the next session the idea and its `/queue:end` files it. If an uncommitted
-  `QUEUE.md` edit blocks `git pull`, run `git stash`, `git pull`, `git stash pop`.
+  `QUEUE.md` edit blocks `git pull`, run `git stash`, `git pull`, `git stash pop`. If the pop
+  reports a conflict in `QUEUE.md`, open it, keep only your own new line, delete the `<<<<<<<`,
+  `=======` and `>>>>>>>` marker lines, then run `git add QUEUE.md` and `git stash drop`.
 - **Optional helpers.** With the
   [architect-crew](https://github.com/Strong-Force-Analytics/architect-crew) plugin installed,
   sessions hand reading, test runs and simple edits to cheaper models.

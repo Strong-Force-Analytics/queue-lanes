@@ -108,7 +108,9 @@ From then on: `/queue:build` in as many terminals as `/queue:end` says, `/queue:
 - **I added an Inbox line and now `git pull` fails.** Sessions work in their own worktree, so
   they never see uncommitted edits in your checkout. A merged session pull request changes
   `QUEUE.md` too, and git won't overwrite your edit. Run `git stash`, `git pull`,
-  `git stash pop`. Next time, commit and push a hand-added line before the next session, or tell
+  `git stash pop`. If the pop reports a conflict in `QUEUE.md` (common after `/queue:spec` emptied
+  the Inbox), open it, keep only your own new line, delete the `<<<<<<<`, `=======` and `>>>>>>>`
+  marker lines, then run `git add QUEUE.md` and `git stash drop`. Next time, commit and push a hand-added line before the next session, or tell
   the next session the idea and its `/queue:end` files it.
 - **Monorepo with several projects.** Each project folder may hold its own `QUEUE.md`; launch
   Claude Code in that folder and the lanes work that queue. A session launched at the repo root

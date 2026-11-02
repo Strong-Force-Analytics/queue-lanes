@@ -414,7 +414,7 @@ th { font-size: 14px; letter-spacing: .06em; text-transform: uppercase; color: v
 # spec and build end by running /queue:end themselves (update the queue, commit,
 # open the pull request); type it only if a session stopped before wrapping.
 # After each merge: git switch main &amp;&amp; git pull</code></pre>
-<p class="small">Day to day: drop ideas into <code>## Inbox</code> whenever they occur to you; the next <code>/queue:spec</code> sorts them into rows. Sessions work in their own worktree and only see committed work, so commit and push a line you add by hand (or tell the next session the idea). If an uncommitted <code>QUEUE.md</code> edit blocks <code>git pull</code>, run <code>git stash</code>, <code>git pull</code>, <code>git stash pop</code>. Open whichever lane fits the time you have.</p>
+<p class="small">Day to day: drop ideas into <code>## Inbox</code> whenever they occur to you; the next <code>/queue:spec</code> sorts them into rows. Sessions work in their own worktree and only see committed work, so commit and push a line you add by hand (or tell the next session the idea). If an uncommitted <code>QUEUE.md</code> edit blocks <code>git pull</code>, run <code>git stash</code>, <code>git pull</code>, <code>git stash pop</code>; if the pop reports a conflict, keep only your own new line, delete the conflict markers, then run <code>git add QUEUE.md</code> and <code>git stash drop</code>. Open whichever lane fits the time you have.</p>
 </section>
 </main>
 </div>
