@@ -75,14 +75,14 @@ th { font-size: 14px; letter-spacing: .06em; text-transform: uppercase; color: v
 <ul>
   <li><strong><code>QUEUE.md</code></strong> holds every piece of pending work, sorted into lanes by <em>kind</em> of work.</li>
   <li><strong>An opener command</strong> (<code>/queue:build</code>, <code>/queue:spec</code>, <code>/queue:meta</code>, <code>/queue:audit</code>) starts a session by reading one lane.</li>
-  <li><strong><code>/queue:end</code></strong> closes the session: it updates the queue, writes a handoff note for the next session, and commits.</li>
+  <li><strong><code>/queue:end</code></strong> closes the session: it updates the queue, writes a handoff note for the next session, and commits. Every opener runs it as its last step, so you type it only if a session stopped before wrapping.</li>
 </ul>
 <p>The lanes exist because the four kinds of work need different behaviour. A build session should build and never stop to redesign. A spec session should make decisions and write them down. Mixing them is how a session spends an hour planning when it was opened to ship.</p>
 </section>
 
 <section id="typical">
 <h2>A typical run</h2>
-<p>Here is how a normal stretch of work looks: six sessions in a row, one of them split across two terminals. Each box is one session. Every session opens with one command and closes with <code>/queue:end</code>; then <code>/clear</code> (or a fresh terminal) starts the next one with an empty context. The queue file carries everything forward, so nothing has to be re-explained.</p>
+<p>Here is how a normal stretch of work looks: six sessions in a row, one of them split across two terminals. Each box is one session. Every session opens with one command and closes with <code>/queue:end</code>, which the session runs itself; then <code>/clear</code> (or a fresh terminal) starts the next one with an empty context. The queue file carries everything forward, so nothing has to be re-explained.</p>
 <div class="diagram">
 <svg viewBox="0 0 1100 350" style="min-width:1100px;max-width:1100px" role="img" aria-label="Six sessions in a row: spec, build, two builds in parallel, spec, build, audit">
   <defs><marker id="ar0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker></defs>
@@ -406,11 +406,15 @@ th { font-size: 14px; letter-spacing: .06em; text-transform: uppercase; color: v
 /plugin install architect-crew@sfa-plugins
 
 # 2. in Claude Code, inside your repo
-/queue:init     # add QUEUE.md and the CLAUDE.md section, open a pull request; merge it
+/queue:init     # add QUEUE.md and the CLAUDE.md section, open a pull request
+                #   (an empty repo gets a first commit on main instead)
+                # merge it, then: git switch main &amp;&amp; git pull
 /queue:spec     # turn your first idea into Build rows
 /queue:build    # build the [HEAD] row
-/queue:end      # wrap: update the queue, commit, open the pull request</code></pre>
-<p class="small">Day to day: drop ideas into <code>## Inbox</code> whenever they occur to you; the next <code>/queue:spec</code> sorts them into rows. Open whichever lane fits the time you have.</p>
+# spec and build end by running /queue:end themselves (update the queue, commit,
+# open the pull request); type it only if a session stopped before wrapping.
+# After each merge: git switch main &amp;&amp; git pull</code></pre>
+<p class="small">Day to day: drop ideas into <code>## Inbox</code> whenever they occur to you; the next <code>/queue:spec</code> sorts them into rows. Sessions work in their own worktree and only see committed work, so commit and push a line you add by hand (or tell the next session the idea). If an uncommitted <code>QUEUE.md</code> edit blocks <code>git pull</code>, run <code>git stash</code>, <code>git pull</code>, <code>git stash pop</code>. Open whichever lane fits the time you have.</p>
 </section>
 </main>
 </div>

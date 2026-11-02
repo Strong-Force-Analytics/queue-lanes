@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.1.1
+
+Fixes first-run friction found while trying the plugin on a new repo.
+
+- `/queue:init` handles an empty repo: with no commits yet, it pushes the setup as the first
+  commit on the default branch instead of failing to open a pull request.
+- `/queue:init` switches back to the default branch after opening its pull request, and the
+  recap names the setup branch.
+- `/queue:init` and `/queue:end` remind you to run `git switch <base>` and `git pull` after
+  merging. `/queue:end` names the branch when it switched to a new one.
+- Docs no longer tell you to type `/queue:end` after every session: spec, build, audit and meta
+  already run it as their last step. The `CLAUDE.md` work-queue section that `/queue:init` writes
+  says the same.
+- Docs explain that a line added to `QUEUE.md` by hand must be committed before the next
+  session, and how to recover when it blocks `git pull`.
+- The starter `QUEUE.md` no longer tells you to copy it and delete the examples, which
+  `/queue:init` already does.
+
 ## 0.1.0
 
 - First release as a Claude Code plugin, `queue`. The commands are Brett Ragozzine's

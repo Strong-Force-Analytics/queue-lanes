@@ -4,8 +4,8 @@ A Claude Code plugin that lets every session start knowing what to do and end by
 next one where to pick up.
 
 Each repo keeps one to-do file, `QUEUE.md`. You open a session with the command for the kind of
-work you want done, and close it with `/queue:end`, which saves a short note for the next session
-and opens a pull request with the work.
+work you want done. Each session closes itself with `/queue:end`, which saves a short note for
+the next session and opens a pull request with the work.
 
 ## How it works
 
@@ -16,8 +16,8 @@ and opens a pull request with the work.
 1. Add ideas and tasks to `QUEUE.md`, by hand or by asking Claude.
 2. Run `/queue:spec` to turn them into small, clear tasks.
 3. Run `/queue:build` to do them. Open several terminals to work on separate tasks at once.
-4. Every session ends with `/queue:end`. Review and merge its pull request, then start the next
-   session.
+4. Each session ends by running `/queue:end` itself. Review and merge its pull request, run
+   `git switch main` and `git pull`, then start the next session.
 
 ## A typical run
 
@@ -50,6 +50,9 @@ Then, in your repo:
 
 This adds `QUEUE.md`, copies in any existing to-do list, and opens a pull request with the setup.
 
+On a brand-new empty repo there is nothing to open a pull request against, so `/queue:init`
+pushes the setup as the first commit on the default branch instead.
+
 Needs `git` and the GitHub CLI (`gh`), signed in.
 
 ## Commands
@@ -61,12 +64,16 @@ Needs `git` and the GitHub CLI (`gh`), signed in.
 | `/queue:build` | Does the next tasks, each with a check that proves it's finished |
 | `/queue:audit` | Checks that the docs and the code still agree, and fixes the gaps |
 | `/queue:meta` | Improves the process itself: the commands, rules and scripts |
-| `/queue:end` | Saves a note for the next session and opens a pull request |
+| `/queue:end` | Saves a note for the next session and opens a pull request. Runs on its own at the end of every session; type it only if a session stopped early |
 
 ## Good to know
 
 - **Pull requests by default.** `/queue:end` never merges; you do. A repo where one person works
   alone can switch to pushing directly, with `Land: push` in its `CLAUDE.md`.
+- **Adding ideas by hand.** Sessions work in their own copy of the repo, so they can't see
+  uncommitted edits in yours. Commit and push a line you add to `## Inbox` before the next
+  session, or tell the next session the idea and its `/queue:end` files it. If an uncommitted
+  `QUEUE.md` edit blocks `git pull`, run `git stash`, `git pull`, `git stash pop`.
 - **Optional helpers.** With the
   [architect-crew](https://github.com/Strong-Force-Analytics/architect-crew) plugin installed,
   sessions hand reading, test runs and simple edits to cheaper models.

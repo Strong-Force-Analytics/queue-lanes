@@ -52,7 +52,7 @@ there is none):
 ## Work queue
 
 All pending work lives in `Documentation/planning/QUEUE.md` (adjust the path), sorted into
-lanes. Open a session with `/queue:build`, `/queue:spec`, `/queue:meta` or `/queue:audit`; close every session with `/queue:end`.
+lanes. Open a session with `/queue:build`, `/queue:spec`, `/queue:meta` or `/queue:audit`; each session wraps itself with `/queue:end` (type it only if a session stopped before wrapping).
 
 Git rules (several sessions can share this repo):
 - Stage and commit explicit paths: `git commit -m "..." -- <paths>`.
@@ -74,9 +74,14 @@ git add Documentation/planning/QUEUE.md .gitignore CLAUDE.md
 git commit -m "[Docs]: add queue lanes (QUEUE.md, CLAUDE.md work-queue section)" -- Documentation/planning/QUEUE.md .gitignore CLAUDE.md
 git push -u origin queue-init
 gh pr create --fill
+git switch main   # the setup is pushed; don't stay on the setup branch
 ```
 
-Merge it before the first session, so `/queue:spec` reads the queue from the default branch.
+Merge it, then run `git switch main` and `git pull` before the first session, so `/queue:spec`
+reads the queue from the default branch.
+
+If the repo has no commits yet, there is no base branch to open a pull request against. Skip
+`git switch -c queue-init` and `gh pr create`: commit on `main` and run `git push -u origin main`.
 
 ## 3. First session
 
@@ -100,6 +105,11 @@ From then on: `/queue:build` in as many terminals as `/queue:end` says, `/queue:
 
 - **We already use GitHub Issues / Trello.** Keep them for discussion and outside requests;
   copy what is ready to work on into `## Inbox`. `QUEUE.md` is what Claude sessions read.
+- **I added an Inbox line and now `git pull` fails.** Sessions work in their own worktree, so
+  they never see uncommitted edits in your checkout. A merged session pull request changes
+  `QUEUE.md` too, and git won't overwrite your edit. Run `git stash`, `git pull`,
+  `git stash pop`. Next time, commit and push a hand-added line before the next session, or tell
+  the next session the idea and its `/queue:end` files it.
 - **Monorepo with several projects.** Each project folder may hold its own `QUEUE.md`; launch
   Claude Code in that folder and the lanes work that queue. A session launched at the repo root
   works only the root queue. Each row's `Files` line keeps groups from colliding.
