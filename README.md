@@ -16,8 +16,9 @@ the next session and opens a pull request with the work.
 1. Add ideas and tasks to `QUEUE.md`, by hand or by asking Claude.
 2. Run `/queue:spec` to turn them into small, clear tasks.
 3. Run `/queue:build` to do them. Open several terminals to work on separate tasks at once.
-4. Each session ends by running `/queue:end` itself. Review and merge its pull request, run
-   `git switch main` and `git pull`, then start the next session.
+4. Each session ends by running `/queue:end` itself. Review and merge its pull request, switch
+   to your default branch and pull (`git switch main` and `git pull`, with your default branch's
+   name if it isn't `main`), then start the next session.
 
 ## A typical run
 
@@ -73,7 +74,8 @@ Needs `git` and the GitHub CLI (`gh`), signed in.
 - **Adding ideas by hand.** Sessions work in their own copy of the repo, so they can't see
   uncommitted edits in yours. Commit and push a line you add to `## Inbox` before the next
   session, or tell the next session the idea and its `/queue:end` files it. If an uncommitted
-  `QUEUE.md` edit blocks `git pull`, run `git stash`, `git pull`, `git stash pop`. If the pop
+  `QUEUE.md` edit blocks `git pull`, run `git stash push -- QUEUE.md` (with your queue's path),
+  `git pull`, `git stash pop`; only the queue is set aside, your other edits stay. If the pop
   reports a conflict in `QUEUE.md`, open it, keep only your own new line, delete the `<<<<<<<`,
   `=======` and `>>>>>>>` marker lines, then run `git add QUEUE.md` and `git stash drop`.
 - **Optional helpers.** With the

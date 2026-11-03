@@ -46,7 +46,7 @@ If the repo has a `TODO.md` or similar, either delete it in the same commit or a
 top pointing at `QUEUE.md`, so the team keeps one list.
 
 **d. Point `CLAUDE.md` at it.** Add this section to the repo's `CLAUDE.md` (create the file if
-there is none):
+there is none). If your default branch isn't `main`, put its name on the `Land:` line:
 
 ```markdown
 ## Work queue
@@ -66,10 +66,13 @@ Git rules (several sessions can share this repo):
      `Land: push` merges and pushes directly instead of opening a pull request. -->
 ```
 
-**e. Commit and open a pull request.**
+**e. Commit and open a pull request.** The commands below use `main`; put your default branch's
+name in its place if it is different (for example `master`). Branch off the default branch, not
+the branch you happen to be on, so the pull request carries only the setup.
 
 ```bash
-git switch -c queue-init
+git fetch origin
+git switch -c queue-init origin/main
 git add Documentation/planning/QUEUE.md .gitignore CLAUDE.md
 git commit -m "[Docs]: add queue lanes (QUEUE.md, CLAUDE.md work-queue section)" -- Documentation/planning/QUEUE.md .gitignore CLAUDE.md
 git push -u origin queue-init
@@ -77,11 +80,12 @@ gh pr create --fill
 git switch main   # the setup is pushed; don't stay on the setup branch
 ```
 
-Merge it, then run `git switch main` and `git pull` before the first session, so `/queue:spec`
-reads the queue from the default branch.
+Merge it, then switch to your default branch and pull (`git switch main` and `git pull`) before
+the first session, so `/queue:spec` reads the queue from the default branch.
 
 If the repo has no commits yet, there is no base branch to open a pull request against. Skip
-`git switch -c queue-init` and `gh pr create`: commit on `main` and run `git push -u origin main`.
+`git fetch`, `git switch -c queue-init` and `gh pr create`: commit on your default branch and
+push it (`git push -u origin main`).
 
 ## 3. First session
 
@@ -107,8 +111,9 @@ From then on: `/queue:build` in as many terminals as `/queue:end` says, `/queue:
   copy what is ready to work on into `## Inbox`. `QUEUE.md` is what Claude sessions read.
 - **I added an Inbox line and now `git pull` fails.** Sessions work in their own worktree, so
   they never see uncommitted edits in your checkout. A merged session pull request changes
-  `QUEUE.md` too, and git won't overwrite your edit. Run `git stash`, `git pull`,
-  `git stash pop`. If the pop reports a conflict in `QUEUE.md` (common after `/queue:spec` emptied
+  `QUEUE.md` too, and git won't overwrite your edit. Run `git stash push -- <queue path>`
+  (for example `git stash push -- Documentation/planning/QUEUE.md`), `git pull`, `git stash pop`.
+  Only the queue is set aside; your other edits stay where they are. If the pop reports a conflict in `QUEUE.md` (common after `/queue:spec` emptied
   the Inbox), open it, keep only your own new line, delete the `<<<<<<<`, `=======` and `>>>>>>>`
   marker lines, then run `git add QUEUE.md` and `git stash drop`. Next time, commit and push a hand-added line before the next session, or tell
   the next session the idea and its `/queue:end` files it.
