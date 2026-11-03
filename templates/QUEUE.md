@@ -1,14 +1,12 @@
 # QUEUE — <project name>
 
-One queue, four lanes, one opener command each. Copy this file to
-`Documentation/planning/QUEUE.md` (or the repo root if the project has no `Documentation/` tree; in a
-monorepo, a project folder such as `apps/web/QUEUE.md`, worked by launching Claude Code in that folder)
-and delete the example items.
+One queue, four lanes, one opener command each.
 
 **How it works**
 - `/queue:build` reads `## Build`, `/queue:spec` reads `## Spec`, `/queue:meta` reads `## Meta`, `/queue:audit` reads `## Audit`.
 - Anyone adds lines to `## Inbox`; only `/queue:spec` turns them into rows, so every new row is packed
-  into the right build group.
+  into the right build group. Commit a hand-added line before the next session; sessions only see
+  committed work.
 - `## Build` is packed into `**Session N — ...**` groups, each with a Files line. One `/queue:build`
   terminal claims one group (by creating a git worktree named after it), so several terminals
   can build at once without touching the same files.
