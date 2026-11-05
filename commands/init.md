@@ -11,7 +11,7 @@ If `$ARGUMENTS` is given, it is where the backlog lives (a file such as `TODO.md
    - No commits here, but the remote has the default branch: say "The remote already has commits. Run `git pull origin <default branch>`, then `/queue:init` again."
    - Commits here, but the remote has no default branch: say "The remote has no `<default branch>` branch yet, so there is nothing to open a pull request against. Push it first with `git push -u origin <default branch>`, then run `/queue:init` again."
 
-   Remember the branch you started on. Before writing any file, if `CLAUDE.md`, `.gitignore` or a `QUEUE.md` at the path picked in step 2 has uncommitted changes (`git status --short`), stop and change nothing: say "Commit or stash your changes to `<file>`, then run `/queue:init` again." Then move onto the branch the setup is committed on, so it never carries another branch's work:
+   Remember the branch you started on. Before writing any file, if `CLAUDE.md`, `.gitignore`, `.claude/settings.json` or a `QUEUE.md` at the path picked in step 2 has uncommitted changes (`git status --short`), stop and change nothing: say "Commit or stash your changes to `<file>`, then run `/queue:init` again." Then move onto the branch the setup is committed on, so it never carries another branch's work:
    - **No `origin` remote:** `git switch <default branch>` (create it with `git switch -c <default branch>` if it does not exist).
    - **Empty repo:** stay on the unborn branch; if it is not named `<default branch>`, run `git switch -c <default branch>`.
    - **Otherwise:** `git fetch origin`, then `git switch -c queue-init-<YYYYMMDD> origin/<default branch>`.
@@ -26,6 +26,12 @@ If `$ARGUMENTS` is given, it is where the backlog lives (a file such as `TODO.md
    Copy `${CLAUDE_PLUGIN_ROOT}/templates/QUEUE.md` there. Set the title line to the project's name. Delete the example rows under `## Build`, `## Spec`, `## Meta` and `## Audit`; keep the headings, the "How it works" notes and the comment blocks. If the template file can't be read, write the file yourself with, top to bottom: `# QUEUE — <project>`, `## ▶ NEXT SESSION — START HERE (written <today>)`, `## Settled`, `## Inbox`, `## Build`, `## Spec`, `## Meta`, `## Audit`.
 
 3. **Ignore session worktrees.** If `git check-ignore -q .claude/worktrees/x` fails, append `.claude/worktrees/` to `.gitignore`.
+
+   **Share `node_modules` with them.** Every lane opens its own worktree, and a worktree starts with no installed packages, so each session would otherwise install its own full copy. If the repo has a `package.json` at its root and `git check-ignore -q node_modules` succeeds, add `node_modules` to `worktree.symlinkDirectories` in `.claude/settings.json` (create the file if there is none; merge into an existing `worktree` key, and keep every other setting). Claude Code then links each new worktree's `node_modules` to the launch tree's copy: no install, no extra disk. Skip it when the root `package.json` has a `workspaces` key or a `pnpm-workspace.yaml` exists, because the shared copy's workspace links point at the launch tree's packages, so a worktree would test the launch tree's code instead of its own. Python `.venv` folders are never shared, for the same reason (an editable install points at the launch tree).
+
+   ```json
+   { "worktree": { "symlinkDirectories": ["node_modules"] } }
+   ```
 
 4. **Bring the backlog in.** Copy every open item the repo already tracks (a `TODO.md` or similar, what `$ARGUMENTS` points to, open items the user names) into `## Inbox`, one line each: `- (YYYY-MM-DD) <item> — <source link>`. Keep links to the source. Sort nothing: `/queue:spec` triages the Inbox. If a `TODO.md` or similar exists, ask whether to delete it or add a line at its top pointing to the queue, so the team keeps one list. Ask before reading an outside tracker; never write to one.
 
@@ -50,7 +56,7 @@ If `$ARGUMENTS` is given, it is where the backlog lives (a file such as `TODO.md
 
    `Land: push` instead tells `/queue:end` to merge into the launch branch and push directly, for a repo where one person works alone on `main`.
 
-6. **Land the setup.** Stage explicit paths only (the queue, `.gitignore`, `CLAUDE.md`, and a removed or edited `TODO.md`). Commit `[Docs]: add queue lanes (QUEUE.md, CLAUDE.md work-queue section)` with explicit paths.
+6. **Land the setup.** Stage explicit paths only (the queue, `.gitignore`, `CLAUDE.md`, `.claude/settings.json` if step 3 changed it, and a removed or edited `TODO.md`). Commit `[Docs]: add queue lanes (QUEUE.md, CLAUDE.md work-queue section)` with explicit paths.
    - **No `origin` remote** (step 1): there is nowhere to push or open a pull request. Commit on the default branch and push nothing.
    - **Empty repo** (step 1): a pull request needs a base branch, and there is none yet. Commit on the default branch and run `git push -u origin <default branch>`. Open no pull request.
    - **Otherwise:** commit on `queue-init-<YYYYMMDD>`, the branch step 1 made from the default branch. Push, and open a pull request against the default branch with `gh pr create`. If `gh` is missing or not signed in (`gh auth status` fails), open no pull request; note which, and print the compare link (`<repo URL>/compare/<default branch>...queue-init-<YYYYMMDD>`, the repo URL from `git remote get-url origin` without `.git`, with an SSH form `git@github.com:<owner>/<repo>` written as `https://github.com/<owner>/<repo>`). Then switch back to the branch you started on (`git switch <start branch>`), so the user is not left on the setup branch; the setup is already pushed.

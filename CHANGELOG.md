@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.1.2
+
+Parallel lanes stop installing `node_modules` once per worktree.
+
+- `/queue:init` adds `node_modules` to `worktree.symlinkDirectories` in `.claude/settings.json`
+  for a Node repo, so each lane worktree links to the launch tree's installed packages instead
+  of installing its own copy. It skips npm/pnpm workspaces and Python `.venv` folders, whose
+  links would point a worktree at the launch tree's code. A repo already set up gets this by
+  adding the setting by hand:
+  `{ "worktree": { "symlinkDirectories": ["node_modules"] } }`.
+- `/queue:spec` lists the manifest and lockfile in the Files of any row that adds, removes or
+  upgrades a dependency, so dependency changes pack into one group and never install in two
+  terminals at once.
+- `/queue:build` never installs through the shared link. A group that owns the manifest swaps
+  the link for its own `npm ci`; a row elsewhere that needs a new package goes to `## Inbox`
+  for `/queue:spec` to repack.
+- `/queue:end` adds `npm install` to the after-merge line when the session changed the
+  manifest, so the shared copy picks up the new packages.
+
 ## 0.1.1
 
 Fixes first-run friction found while trying the plugin on a new repo.
