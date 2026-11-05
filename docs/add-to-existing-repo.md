@@ -37,6 +37,18 @@ Edit the title line, and delete the example rows under `## Build`, `## Spec`, `#
 echo ".claude/worktrees/" >> .gitignore
 ```
 
+In a Node repo, also share `node_modules` with the worktrees, so each lane links to your
+installed packages instead of installing its own copy. Put this in `.claude/settings.json`
+(merge it into the file if one exists) and add that file to the commit in step e:
+
+```json
+{ "worktree": { "symlinkDirectories": ["node_modules"] } }
+```
+
+Skip it for npm/pnpm workspaces (a `workspaces` key in `package.json`, or a
+`pnpm-workspace.yaml`): their links point at the launch tree's packages, so a worktree would
+test the wrong code. For the same reason a Python `.venv` is never shared.
+
 **c. Bring the existing backlog in.** Paste every open item you already track (a `TODO.md`,
 issue titles, Trello cards, notes) into `## Inbox`, one line each. Keep links to the source.
 Leave sorting for step 3; that is `/queue:spec`'s job. Asking Claude works too:
@@ -102,6 +114,8 @@ From then on: `/queue:build` in as many terminals as `/queue:end` says, `/queue:
 - `QUEUE.md` is at one of the lookup paths and has the seven headings
   (`▶ NEXT SESSION`, `Settled`, `Inbox`, `Build`, `Spec`, `Meta`, `Audit`).
 - `git check-ignore .claude/worktrees/x` prints the path.
+- Node repo: the first lane's `.claude/worktrees/<name>/node_modules` is a link to your
+  `node_modules`, not an empty or missing folder.
 - After the first `/queue:spec` + `/queue:end`: the `## ▶ NEXT SESSION` block is filled in, `## Inbox` is
   empty, and at least one Build row carries `[HEAD]`.
 
