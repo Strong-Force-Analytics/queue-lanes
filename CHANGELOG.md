@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.3
+
+Makes the shared `node_modules` swap safe.
+
+- `/queue:build` confirms `node_modules` is a link, removes the link, confirms it is gone, and
+  only then installs. An install run through the link would rewrite or delete the shared copy
+  every open lane uses. If a check fails, the session stops and reports instead of installing.
+- The swap uses the repo's own clean install (`npm ci`, `pnpm install --frozen-lockfile` or
+  `yarn install --frozen-lockfile`), and counts pnpm and yarn lockfiles as the lockfile.
+- `/queue:end` names the repo's own install in the after-merge line.
+
 ## 0.1.2
 
 Parallel lanes stop installing `node_modules` once per worktree.
