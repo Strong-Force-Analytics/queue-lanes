@@ -51,7 +51,7 @@ This is a **spec** session (the planning lane). You decide *what* to build and *
 
      Leave a lone item unmarked. When nothing in the lane is file-disjoint, say so in one line rather than forcing a grouping.
    - **Pack the Build lane into sessions, and count them.** The unit a spec session hands over is a session plan (`Session 1`, `Session 2`, ...), rather than a flat list of rows. Pack by three keys, in this order:
-     1. **Files touched.** Write each row's owned files down first, merge every pair of rows whose files overlap into one session, and only then look at anything else. Packing by feature instead leaves two sessions writing the same hub files.
+     1. **Files touched.** Write each row's owned files down first, merge every pair of rows whose files overlap into one session, and only then look at anything else. Packing by feature instead leaves two sessions writing the same hub files. **A row that adds, removes or upgrades a dependency lists the manifest and its lockfile in its Files** (`package.json` and `package-lock.json`, or the repo's equivalents), even when the row's own code is elsewhere. Every dependency change then lands in one group, and the overlap rule in `/queue:build` keeps two terminals from installing at once.
      2. **The same expensive step.** Rows that end in the same long re-run, probe, render, or full test pass go into one session, so that step runs once rather than per row.
      3. **File-disjointness inside the session.** What is left becomes the parallel waves above. A file-disjoint tail (packaging, docs) rides as the last wave of the session before it rather than becoming its own session.
 
