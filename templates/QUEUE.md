@@ -47,7 +47,9 @@ One queue, four lanes, one opener command each.
   - **Files:** `path/one.py`, `path/two.md`
   - **Guardrails:** <the condition to hold so this lands right — what a builder reading only the summary would miss>
   - **Done when:** <the observable gate — a passing suite, a regenerated artifact, a green run>
-- [ ] Build 2 — <the one after that, same three lines>
+  - **From:** <the Inbox line this row came from, word for word>
+  - **Cut:** <only when part of that line needs no work: the part, and the search that shows it>
+- [ ] Build 2 — <the one after that, same lines>
 
 **Session 2 — packed by file:** Files `path/three.py`, `path/four.py`, `src/registry.py`
 
