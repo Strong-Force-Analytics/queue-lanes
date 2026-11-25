@@ -39,7 +39,7 @@ This is an **audit** session. The job is verification: find where the repo's sta
 
 6. **Close what you can, queue at most three.** Fix each cheap discrepancy in this pass. Of what needs a real build, queue the three with the most consequence in `## Build` (each with **Files**, **Guardrails** (the condition to hold so the change lands right), and **Done when**) or in `## Spec` for a decision; name the rest in the report, where the user can promote one.
 
-7. **Delete the item from `## Audit` in the same commit, and report** the findings ranked by consequence, each with its evidence, plus what you fixed and what you queued. A clean audit is a real result; say so plainly rather than padding it.
+7. **Delete the item from `## Audit` in the same commit, and report** the findings ranked by consequence, each with its evidence, plus what you fixed and what you queued. A clean audit is a real result; say so plainly rather than padding it. End the report with the verdict, `pass` or `fail` by the rule in `/queue:end`, so the wrap writes it into the handoff block's `Audit verdict` line. A finding you fixed in this pass, with its test passing, does not fail the audit; one you only queued does.
 
 **Wrap yourself.** When the work stops (the lane item is done, a stop line is hit, or context runs thin), as the session's last step: invoke the `queue:end` skill (the `/queue:end` command); if that is unavailable, tell the user to type `/queue:end`.
 

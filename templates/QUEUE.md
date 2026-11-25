@@ -26,6 +26,8 @@ One queue, four lanes, one opener command each.
 <!-- One handoff block, rewritten by /queue:end each session:
      One thing: the single most useful next action.
      Blocked on: what is waiting on a person, if anything.
+     Next lane: spec, build, audit or none, the lane a chain runner starts next.
+     Audit verdict: pass or fail, written by audit sessions only.
      Next actions: 2-4 concrete steps. -->
 
 ## Settled
