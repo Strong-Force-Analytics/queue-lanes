@@ -5,6 +5,7 @@
 #   FIRST_LANE=spec|build|audit   lane to start with (default spec)
 #   EXTRA_TOOLS="Bash(npm test*)"  extra allowed tools, comma-separated, for the repo's test command
 #   PLUGIN_DIR=<folder>            load the queue plugin from this folder instead of the installed one (to test a branch)
+#   PER_SESSION_USD, PER_SESSION_TURNS, PER_SESSION_SECONDS  per-session caps (default 2, 80, 1200)
 #
 # Each lane is one headless Claude Code session (`claude -p "/queue:<lane>"`), so each starts
 # fresh and reads only the handoff block. The runner itself is not an AI: it waits for free.
@@ -17,9 +18,9 @@ REPO=${1:?usage: run-chain.sh <repo-dir> [max-sessions] [max-total-usd]}
 MAX_SESSIONS=${2:-6}
 MAX_TOTAL_USD=${3:-8}
 MAX_AUDIT_FAILS=2
-PER_SESSION_USD=2
-PER_SESSION_TURNS=80
-PER_SESSION_SECONDS=1200
+PER_SESSION_USD=${PER_SESSION_USD:-2}
+PER_SESSION_TURNS=${PER_SESSION_TURNS:-80}
+PER_SESSION_SECONDS=${PER_SESSION_SECONDS:-1200}
 FIRST_LANE=${FIRST_LANE:-spec}
 
 # Only what a lane needs. No open shell: no PowerShell tool, no bare Bash, and only the git
