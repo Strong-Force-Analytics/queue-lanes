@@ -44,12 +44,11 @@ rebase *
 merge --ff-only *
 worktree *
 branch*
-config branch.*
 config --get-regexp *
 EOF
 [ -n "${EXTRA_TOOLS:-}" ] && TOOLS="$TOOLS,$EXTRA_TOOLS"
 # Anything not allowed above is already refused; these are named so a wide EXTRA_TOOLS can't undo them.
-DENY="Bash(gh pr create *),Bash(gh pr merge *),Bash(git push --*),Bash(git push -f*),Bash(git push origin*),Bash(git switch*),Bash(git checkout*),Bash(git -C*),Bash(git reset --hard*),Bash(git branch -f*),Bash(git branch -D*)"
+DENY="Bash(gh pr create *),Bash(gh pr merge *),Bash(git push --*),Bash(git push -f*),Bash(git push origin*),Bash(git switch*),Bash(git checkout*),Bash(git -C*),Bash(git reset --hard*),Bash(git branch -f*),Bash(git branch -D*),Bash(git branch -d*),Bash(git branch -m*),Bash(git branch -M*),Bash(git branch --delete*),Bash(git branch --force*),Bash(git branch --move*),Bash(git branch --set-upstream*),Bash(git branch -u*),Bash(git config*)"
 
 stop() { echo "stop: $*"; exit 1; }
 PY=""
@@ -73,6 +72,7 @@ done
 [ -n "$TIMEOUT" ] || echo "warning: no working timeout command; each session is capped by turns and spend only"
 
 cd "$REPO" || stop "no repo at $REPO"
+REPO=$(pwd)   # absolute, so the log folder lands outside the repo even for a relative path
 [ -f QUEUE.md ] || stop "no QUEUE.md in $REPO"
 [ -z "$(git status --porcelain)" ] || stop "the working tree has changes; commit or stash them first"
 BASE=$(git rev-parse --abbrev-ref HEAD)
@@ -83,6 +83,23 @@ git fetch -q origin && git merge -q --ff-only "origin/$BASE" 2>/dev/null || stop
 STAMP=$(date +%Y%m%d-%H%M%S)
 CHAIN="chain-$STAMP"
 git switch -q -c "$CHAIN" && git push -q -u origin "$CHAIN" || stop "could not make and push branch $CHAIN"
+BASE_SHA=$(git rev-parse "origin/$BASE")   # the base must not move while the chain runs
+
+# A local pre-push hook refuses any push to the base, from the repo or any of its worktrees.
+# Sessions can't skip it: every "git push --..." form, --no-verify included, is denied above.
+HOOK="$(git rev-parse --git-common-dir)/hooks/pre-push"
+[ -e "$HOOK" ] && stop "the repo already has a pre-push hook; the runner needs its own guard there"
+mkdir -p "$(dirname "$HOOK")"
+cat > "$HOOK" <<HOOKEOF
+#!/bin/sh
+# Installed by run-chain.sh for one run; removed when the run ends.
+while read -r _ _ remote_ref _; do
+  case "\$remote_ref" in refs/heads/$BASE) echo "run-chain: pushing to $BASE is not allowed during a chain run" >&2; exit 1 ;; esac
+done
+exit 0
+HOOKEOF
+chmod +x "$HOOK"
+trap 'rm -f "$HOOK"' EXIT
 
 LOGDIR="$REPO/../chain-$STAMP"
 mkdir -p "$LOGDIR"
@@ -92,7 +109,7 @@ echo "claude $(claude --version 2>/dev/null)" > "$LOGDIR/version.txt"
 git rev-parse HEAD > "$LOGDIR/start-commit.txt"
 
 RULES="Runner rules for this unattended run (no person is watching):
-- Land with Land: push onto the launch branch $CHAIN, whatever CLAUDE.md says. Never open or merge a pull request: the runner opens one at the end. Never push to $BASE.
+- Land: push onto the launch branch $CHAIN, whatever CLAUDE.md says. Never open or merge a pull request: the runner opens one at the end. Never push to $BASE.
 - Write the handoff block's Next lane line, and in an audit session the Audit verdict line, exactly as /queue:end says.
 - Never start a Meta session and never pick meta as the next lane.
 - Run one shell command per tool call; do not chain commands with && or newlines.
@@ -109,6 +126,7 @@ total=0; ran=0; fails=0
 lane=$FIRST_LANE
 for n in $(seq 1 "$MAX_SESSIONS"); do
   case "$lane" in spec|build|audit) ;; *) echo "stop: next lane is '$lane'"; break ;; esac
+  "$PY" -I -c "import sys; sys.exit(0 if $total + $PER_SESSION_USD <= $MAX_TOTAL_USD else 1)" || { echo "stop: another session could pass the chain spend cap $MAX_TOTAL_USD USD"; break; }
   ran=$n
   before=$(written)
   echo "== session $n: /queue:$lane  (spent so far: $total USD)"
@@ -147,6 +165,9 @@ PY
 
   [ "$code" -eq 0 ] || { echo "stop: session exited with $code"; break; }
   [ "$(printf '%s' "$stats" | cut -f1)" = "False" ] || { echo "stop: session reported an error"; break; }
+  git fetch -q origin 2>/dev/null
+  [ "$(git rev-parse "origin/$BASE")" = "$BASE_SHA" ] || { echo "stop: $BASE moved on origin during session $n; check it before anything else"; break; }
+  [ "$(git rev-parse --abbrev-ref HEAD)" = "$CHAIN" ] || { echo "stop: the repo is no longer on $CHAIN after session $n"; break; }
   [ "$pulled" = yes ] || { echo "stop: could not update the chain branch after the session (see $LOGDIR/pull-$n.err)"; break; }
   [ -z "$(git status --porcelain)" ] || { echo "stop: the session left changes it did not commit"; break; }
   [ "$(written)" != "$before" ] ||{ echo "stop: the session wrote no new handoff block (queue plugin not loaded, or it never wrapped)"; break; }
