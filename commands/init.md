@@ -1,5 +1,10 @@
 ---
 description: Set the repo up for queue lanes - place QUEUE.md, ignore session worktrees, bring the backlog into the Inbox, add the work-queue section to CLAUDE.md
+type: Runbook
+title: /queue:init — Queue setup command
+tags: [queue-lanes, command]
+status: draft
+generated: { by: "human:Russel", at: "2026-11-26T15:35:00Z" }
 ---
 
 **Purpose: after this, any teammate can open a session with `/queue:spec` or `/queue:build` and it knows what to do.** One person runs it once per repo (or once per project folder in a monorepo). Be concise; do the work.
@@ -55,6 +60,8 @@ If `$ARGUMENTS` is given, it is where the backlog lives (a file such as `TODO.md
    ```
 
    `Land: push` instead tells `/queue:end` to merge into the launch branch and push directly, for a repo where one person works alone on `main`.
+
+   **A test command that works in every worktree.** If `CLAUDE.md` names a test command that calls a gitignored folder by a relative path (`.venv/Scripts/python -m pytest -q`), it fails in a lane worktree, which has no such folder. Rewrite it with the launch tree's absolute path (`C:/code/app/.venv/Scripts/python -m pytest -q`), so every lane runs the worktree's tests with one shared environment. That is safe only when the project itself is not installed into the environment (`pip show <name>` prints nothing), because an installed copy, editable or not, can be what the tests import instead of the worktree's code. Otherwise leave the command, and add one line saying each lane makes its own environment first.
 
 6. **Land the setup.** Stage explicit paths only (the queue, `.gitignore`, `CLAUDE.md`, `.claude/settings.json` if step 3 changed it, and a removed or edited `TODO.md`). Commit `[Docs]: add queue lanes (QUEUE.md, CLAUDE.md work-queue section)` with explicit paths.
    - **No `origin` remote** (step 1): there is nowhere to push or open a pull request. Commit on the default branch and push nothing.

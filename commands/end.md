@@ -1,5 +1,10 @@
 ---
 description: Wrap the session — keep the top ideas, and leave the next session one handoff block it can act on alone
+type: Runbook
+title: /queue:end — Session wrap command
+tags: [queue-lanes, command]
+status: draft
+generated: { by: "human:Russel", at: "2026-11-26T15:35:00Z" }
 ---
 
 **Purpose: the next session starts cleanly from one block, and the session's best ideas persist in the queue.** The wrap stays fast: it records what the session learned and re-runs nothing. Be concise; do the work.
@@ -27,6 +32,8 @@ description: Wrap the session — keep the top ideas, and leave the next session
    **The one thing:** <one sentence — the single highest-leverage next move>
    **Why:** <one or two sentences>
    **Blocked on:** <nothing | what, who clears it, and how this was verified>
+   **Next lane:** <spec | build | audit | none>
+   **Audit verdict:** <pass | fail>
 
    **Actions:**
    1. <action> — files: `<paths>`. Guardrails: <the condition to hold so this lands right>. Done when: <check>
@@ -40,6 +47,13 @@ description: Wrap the session — keep the top ideas, and leave the next session
    **Recommended model:** <model> — <reason>
    ```
 
+   - **Next lane and Audit verdict are read by a script.** A runner that chains sessions with no person reads these two lines from the block, so write each on its own line, in exactly this form, with one value and nothing after it. `Next lane` is the lane a chain starts next, which is not always the recap's `Next:` line:
+     - after a spec session that left a claimable `## Build` group: `build`
+     - after a build session: `audit`, so the chain's work is checked before it counts
+     - after an audit session that passed: `none`
+     - after an audit session that failed and queued a fix row in `## Build`: `build`
+     - `none` whenever `Blocked on` is not `nothing`, after a meta session, and when nothing is left to run. Never `meta`: a person starts meta.
+   - **Audit verdict** is written by audit sessions only; other sessions leave the line out. It is `fail` when any `Done when` the audit checked does not hold, a test fails, or the work does not match the wording of the row or Inbox line it came from; otherwise `pass`. A fail names its findings in the block's Actions.
    - Every action names its files, its guardrail and its done-check. Follow-ons are chosen because they reuse the files the one thing loads, never by priority; write none rather than pad. Convert relative dates to absolute. Use local time.
    - **When the queue has a `## Build` lane**, the block's Actions is one pointer: *"Take `QUEUE.md` `## Build` `[HEAD]`; its Files, Guardrails and Done when are the build."* The build detail stays in the row. If this session finished a row and its `Done when` passed, delete the row and move `[HEAD]` to the next one. A finished row that is not `[HEAD]` (a Spec, Meta or Audit row, or a Build row a parallel session finished) is deleted without moving `[HEAD]`, along with its line in any ranking table; search for any other line that still names its id and edit it. Closing finished rows and adding the step 1 Inbox lines are the only queue edits a wrap makes.
    - **When `## Inbox` holds items at wrap time**, the block says so in one line: *"Inbox holds N items — the next free session runs `/queue:spec` to turn them into rows and pack them before claiming a build group."* Only `/queue:spec` triages the Inbox.
