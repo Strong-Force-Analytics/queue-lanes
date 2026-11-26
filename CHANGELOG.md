@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.2.0
+
+Lanes can run one after another with no person: spec, build and audit in a row, ending in one
+pull request a person reviews and merges.
+
+- `/queue:end` writes two more handoff lines, `**Next lane:**` and, after an audit,
+  `**Audit verdict:**`, in one fixed form a script can read.
+- `scripts/run-chain.sh` runs each lane as its own headless session on one chain branch, follows
+  the `Next lane` line, and opens one pull request at the end. Sessions get only the git and file
+  commands a lane needs, with no open shell, and never push to or merge the base branch. The run
+  stops on any error, a session that wrote no handoff, anything waiting on a person, a third
+  failed audit, or a spend cap.
+- `/queue:chain` checks the repo is ready for a chain and prints the line that starts it.
+- `/queue:spec` quotes each Inbox line on its row (`**From:**`) and names every part it skips,
+  with whole-repo evidence (`**Cut:**`).
+- `/queue:audit` checks finished rows against what was asked, writes its own search to challenge
+  each cut, checks every option of a tested function, and reports only figures from commands it
+  ran. A cut with no evidence fails the audit.
+- Lane worktrees fast-forward to the launch branch right after they are entered, since they can
+  start from the remote's default branch.
+- `/queue:init` rewrites a test command that calls a gitignored folder by a relative path, so it
+  works in every lane worktree, when that is safe.
+
 ## 0.1.3
 
 Makes the shared `node_modules` swap safe.

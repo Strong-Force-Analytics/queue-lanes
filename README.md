@@ -65,10 +65,15 @@ Needs `git` and the GitHub CLI (`gh`), signed in.
 | `/queue:build` | Does the next tasks, each with a check that proves it's finished |
 | `/queue:audit` | Checks that the docs and the code still agree, and fixes the gaps |
 | `/queue:meta` | Improves the process itself: the commands, rules and scripts |
+| `/queue:chain` | Checks the repo is ready to run spec, build and audit in a row with no person, and prints the line that starts it |
 | `/queue:end` | Saves a note for the next session and opens a pull request. Runs on its own at the end of every session; type it only if a session stopped early |
 
 ## Good to know
 
+- **Running lanes in a row.** `/queue:chain` prints a line that starts `scripts/run-chain.sh` in a
+  terminal. It runs spec, build and audit one after another on a new `chain-<date-time>` branch,
+  each as its own session, and opens one pull request for you to review and merge. It never
+  pushes to your base branch. Use it only on a low-risk repo with tests.
 - **Pull requests by default.** `/queue:end` never merges; you do. A repo where one person works
   alone can switch to pushing directly, with `Land: push` in its `CLAUDE.md`.
 - **Adding ideas by hand.** Sessions work in their own copy of the repo, so they can't see
