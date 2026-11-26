@@ -4,6 +4,7 @@
 # Usage: run-chain.sh <repo-dir> [max-sessions] [max-total-usd]
 #   FIRST_LANE=spec|build|audit   lane to start with (default spec)
 #   EXTRA_TOOLS="Bash(npm test*)"  extra allowed tools, comma-separated, for the repo's test command
+#   PLUGIN_DIR=<folder>            load the queue plugin from this folder instead of the installed one (to test a branch)
 #
 # Each lane is one headless Claude Code session (`claude -p "/queue:<lane>"`), so each starts
 # fresh and reads only the handoff block. The runner itself is not an AI: it waits for free.
@@ -58,7 +59,13 @@ done
 [ -n "$PY" ] || stop "a working python is needed to read the run reports (the Windows Store stub does not count)"
 command -v claude >/dev/null || stop "claude is not on PATH"
 command -v gh >/dev/null && gh auth status >/dev/null 2>&1 || stop "gh is missing or signed out (run: gh auth login)"
-claude plugin list 2>/dev/null | grep -q 'queue@' || stop "the queue plugin is not installed for headless runs"
+PLUGIN_ARGS=()
+if [ -n "${PLUGIN_DIR:-}" ]; then
+  [ -f "$PLUGIN_DIR/commands/end.md" ] || stop "no queue plugin in PLUGIN_DIR=$PLUGIN_DIR"
+  PLUGIN_ARGS=(--plugin-dir "$PLUGIN_DIR")
+else
+  claude plugin list 2>/dev/null | grep -q 'queue@' || stop "the queue plugin is not installed for headless runs"
+fi
 TIMEOUT=""
 for t in timeout gtimeout; do
   if command -v "$t" >/dev/null && "$t" 1 true >/dev/null 2>&1; then TIMEOUT=$t; break; fi
@@ -106,7 +113,7 @@ for n in $(seq 1 "$MAX_SESSIONS"); do
   before=$(written)
   echo "== session $n: /queue:$lane  (spent so far: $total USD)"
   out="$LOGDIR/run-$n-$lane.json"
-  $TIMEOUT ${TIMEOUT:+$PER_SESSION_SECONDS} claude -p "/queue:$lane" \
+  $TIMEOUT ${TIMEOUT:+$PER_SESSION_SECONDS} claude -p "/queue:$lane" "${PLUGIN_ARGS[@]}" \
     --permission-mode dontAsk --permission-prompts none \
     --allowedTools "$TOOLS" --disallowedTools "$DENY" --append-system-prompt "$RULES" \
     --max-turns "$PER_SESSION_TURNS" --max-budget-usd "$PER_SESSION_USD" \
