@@ -1,5 +1,10 @@
 ---
 description: Open a meta session — improve how the work gets done, from the Meta lane of the queue
+type: Runbook
+title: /queue:meta — Meta lane command
+tags: [queue-lanes, command]
+status: draft
+generated: { by: "human:Russel", at: "2026-11-26T15:35:00Z" }
 ---
 
 This is a **meta** session. The subject is the process itself: the commands, skills, conventions, tooling, and workflow that produce the work, rather than the work's own content. Be concise; ship a change, never a proposal.

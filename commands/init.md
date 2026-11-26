@@ -1,5 +1,10 @@
 ---
 description: Set the repo up for queue lanes - place QUEUE.md, ignore session worktrees, bring the backlog into the Inbox, add the work-queue section to CLAUDE.md
+type: Runbook
+title: /queue:init — Queue setup command
+tags: [queue-lanes, command]
+status: draft
+generated: { by: "human:Russel", at: "2026-11-26T15:35:00Z" }
 ---
 
 **Purpose: after this, any teammate can open a session with `/queue:spec` or `/queue:build` and it knows what to do.** One person runs it once per repo (or once per project folder in a monorepo). Be concise; do the work.

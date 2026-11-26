@@ -1,5 +1,10 @@
 ---
 description: Check the repo is ready for a chain run (spec, build, audit with no person) and print the one line that starts it
+type: Runbook
+title: /queue:chain — Chain readiness command
+tags: [queue-lanes, command]
+status: draft
+generated: { by: "human:Russel", at: "2026-11-26T15:35:00Z" }
 ---
 
 This command **checks and prints; it never starts the chain.** A chain runs lane after lane, each in a fresh headless session, so it is started by a script in the terminal, which waits for free and has no time limit. A Claude session that started it would sit waiting, using tokens, and closing it could stop the chain halfway.

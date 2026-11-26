@@ -1,5 +1,10 @@
 ---
 description: Wrap the session — keep the top ideas, and leave the next session one handoff block it can act on alone
+type: Runbook
+title: /queue:end — Session wrap command
+tags: [queue-lanes, command]
+status: draft
+generated: { by: "human:Russel", at: "2026-11-26T15:35:00Z" }
 ---
 
 **Purpose: the next session starts cleanly from one block, and the session's best ideas persist in the queue.** The wrap stays fast: it records what the session learned and re-runs nothing. Be concise; do the work.

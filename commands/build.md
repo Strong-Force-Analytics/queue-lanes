@@ -1,5 +1,10 @@
 ---
 description: Build lane - read the handoff block /queue:end left and start the work
+type: Runbook
+title: /queue:build — Build lane command
+tags: [queue-lanes, command]
+status: draft
+generated: { by: "human:Russel", at: "2026-11-26T15:35:00Z" }
 ---
 
 Start this session from the handoff block the previous `/queue:end` wrote. Be concise; do the work, rather than describing it.

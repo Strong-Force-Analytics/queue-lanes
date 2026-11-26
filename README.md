@@ -1,3 +1,12 @@
+---
+type: Explanation
+title: queue-lanes plugin
+description: What the queue plugin does, how to install it, and its commands.
+tags: [queue-lanes]
+status: draft
+generated: { by: "human:Russel", at: "2026-11-26T15:35:00Z" }
+---
+
 # queue-lanes
 
 A Claude Code plugin that lets every session start knowing what to do and end by telling the

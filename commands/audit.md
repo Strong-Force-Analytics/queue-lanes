@@ -1,5 +1,10 @@
 ---
 description: Open an audit session — check that what the docs claim is what the repo actually does, from the Audit lane
+type: Runbook
+title: /queue:audit — Audit lane command
+tags: [queue-lanes, command]
+status: draft
+generated: { by: "human:Russel", at: "2026-11-26T15:35:00Z" }
 ---
 
 This is an **audit** session. The job is verification: find where the repo's stated position and its actual state have moved apart, then close the gap. Be concise; report findings with evidence, and fix what is cheap to fix in the same pass.

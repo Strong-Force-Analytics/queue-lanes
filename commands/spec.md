@@ -1,5 +1,10 @@
 ---
 description: Open a spec session — read the Spec lane of the queue, make the open decisions, and write the spec a build session can act on
+type: Runbook
+title: /queue:spec — Spec lane command
+tags: [queue-lanes, command]
+status: draft
+generated: { by: "human:Russel", at: "2026-11-26T15:35:00Z" }
 ---
 
 This is a **spec** session (the planning lane). You decide *what* to build and *why*; you do not build it. Be concise. Produce a decision or a written plan, never an option menu.

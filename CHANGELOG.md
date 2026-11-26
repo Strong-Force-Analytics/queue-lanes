@@ -1,3 +1,12 @@
+---
+type: Reference
+title: queue-lanes changelog
+description: What changed in each version of the queue plugin.
+tags: [queue-lanes]
+status: draft
+generated: { by: "human:Russel", at: "2026-11-26T15:35:00Z" }
+---
+
 # Changelog
 
 ## 0.2.0
